@@ -35,6 +35,15 @@ if __name__ == "__main__":
     "--N_mc", type=int, default=1, 
     help="number of trials using Monte Carlo technique")
   parser.add_argument(
+    "--key_jd", default="t_jd_ltcor", 
+    help="Keyword of time in JD")
+  parser.add_argument(
+    "--flux", default="flux", 
+    help="Keyword of flux")
+  parser.add_argument(
+    "--fluxerr", default="fluxerr", 
+    help="Keyword of flux uncertainty")
+  parser.add_argument(
     "--out", default="out_lcs", 
     help="output filename")
   args = parser.parse_args()
@@ -44,7 +53,7 @@ if __name__ == "__main__":
   result = []
   # Extract object info
   for csv,jpl in zip(args.csv, args.jpl):
-      df_phot = format4inv(csv, jpl, args.absflux)
+      df_phot = format4inv(csv, jpl, args.key_jd)
       result.append(df_phot)
 
   # Set seed 
@@ -64,4 +73,6 @@ if __name__ == "__main__":
           random = True
       else:
           random = False
-      save4inv(result, args.absflux, random, out)
+      save4inv(
+          result, args.absflux, random, args.key_jd, args.key_flux,
+          args.key_fluxerr, out)
