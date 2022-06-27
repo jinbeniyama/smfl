@@ -21,6 +21,9 @@ if __name__ == "__main__":
         "--Nbeta", type=int, default=1, 
         help="number of ecliptic latitude")
     parser.add_argument(
+        "--N_p", type=int, default=4, 
+        help="number of processes")
+    parser.add_argument(
         "--lc", type=str, default=None, 
         help="preprocessed lightcurve")
     parser.add_argument(
@@ -46,7 +49,7 @@ if __name__ == "__main__":
     params = [(l, b, lc) for l, b in itertools.product(lam, beta)]
     print(f"  Number of iterations N_iter = {len(params)}")
 
-    n_p = 4
+    n_p = args.N_p
     with multiprocessing.Pool(processes=n_p) as pool:
         pool.starmap(do_conv, params)
 
