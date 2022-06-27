@@ -17,7 +17,7 @@ Read a documentation in DAMIT website about the format of output.
 from argparse import ArgumentParser as ap
 import numpy as np
 
-from smlf import format4inv, save4inv
+from smfl import format4inv, save4inv
 
 
 if __name__ == "__main__":
@@ -38,10 +38,10 @@ if __name__ == "__main__":
     "--key_jd", default="t_jd_ltcor", 
     help="Keyword of time in JD")
   parser.add_argument(
-    "--flux", default="flux", 
+    "--key_flux", default="flux", 
     help="Keyword of flux")
   parser.add_argument(
-    "--fluxerr", default="fluxerr", 
+    "--key_fluxerr", default="fluxerr", 
     help="Keyword of flux uncertainty")
   parser.add_argument(
     "--out", default="out_lcs", 

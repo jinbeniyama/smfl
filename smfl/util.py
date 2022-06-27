@@ -11,6 +11,7 @@ Calculate x_sun, y_sun ,z_sun (sun cartesian coodinate from the object)
 and x_earth, y_earth, z_earth (earth cartesian coordinate from the object).
 """
 import os 
+import subprocess
 from argparse import ArgumentParser as ap
 import numpy as np
 import pandas as pd
@@ -21,6 +22,22 @@ from astropy import units as u
 from astropy.coordinates import SkyCoord
 import astropy
 from astropy.time import Time
+
+
+def time_keeper(func):
+    """
+    Decorator to measure time.
+    """
+    # To take over docstring etc.
+    @wraps(func)
+    def wrapper(*args, **kargs):
+        t0 = time.time()
+        result = func(*args, **kargs)
+        t1 = time.time()
+        t_elapse = t1 - t0
+        print(f"[time keeper] t_elapse = {t_elapse:.03f} s (func :{func.__name__})")
+        return result
+    return wrapper
 
 
 def format4inv(lc, jpleph, key_jd):
@@ -146,25 +163,25 @@ def format4inv(lc, jpleph, key_jd):
         )
     df_temp = pd.DataFrame(dic_temp.values(), index=dic_temp.keys()).T
 
-    # Read photometric csv
-    df = pd.read_csv(lc, sep=" ")
-    col = df.columns.tolist()
-    assert set(key_jd, key_flux, key_fluxerr).issubset(col), "Check columns!"
 
     # function to predict various values when observation
     f_sun_x = interpolate.interp1d(
-        df[key_jd], df["x_sun"], kind='linear', fill_value='extrapolate')
+        df_temp["jd"], df_temp["x_sun"], kind='linear', fill_value='extrapolate')
     f_sun_y = interpolate.interp1d(
-        df[key_jd], df["y_sun"], kind='linear', fill_value='extrapolate')
+        df_temp["jd"], df_temp["y_sun"], kind='linear', fill_value='extrapolate')
     f_sun_z = interpolate.interp1d(
-        df[key_jd], df["z_sun"], kind='linear', fill_value='extrapolate')
+        df_temp["jd"], df_temp["z_sun"], kind='linear', fill_value='extrapolate')
     f_earth_x = interpolate.interp1d(
-        df[key_jd], df["x_earth"], kind='linear', fill_value='extrapolate')
+        df_temp["jd"], df_temp["x_earth"], kind='linear', fill_value='extrapolate')
     f_earth_y = interpolate.interp1d(
-        df[key_jd], df["y_earth"], kind='linear', fill_value='extrapolate')
+        df_temp["jd"], df_temp["y_earth"], kind='linear', fill_value='extrapolate')
     f_earth_z = interpolate.interp1d(
-        df[key_jd], df["z_earth"], kind='linear', fill_value='extrapolate')
+        df_temp["jd"], df_temp["z_earth"], kind='linear', fill_value='extrapolate')
     
+    # Read photometric csv
+    df = pd.read_csv(lc, sep=" ")
+    col = df.columns.tolist()
+
     # predict x, y, z of the Sun and the Earth 
     df["x_sun"]   = df[key_jd].map(f_sun_x)
     df["y_sun"]   = df[key_jd].map(f_sun_y)
@@ -234,3 +251,33 @@ def save4inv(result, absflux, random, key_jd, key_flux, key_fluxerr, out):
                     f"{row['x_sun']} {row['y_sun']} {row['z_sun']} "
                     f"{row['x_earth']} {row['y_earth']} {row['z_earth']} "
                     f"\n")
+
+
+def do_conv(lam, beta, lc):
+    """
+    Do convex inversion.
+
+    Parameters
+    ----------
+    lam : float
+        longitude
+    beta : float
+        latitude
+    lc : str
+        lightcurve
+    """
+    l = lam
+    b = beta
+    print(f"  (lam, beta) = ({l:.1f}, {b:.1f})")
+
+    inp = f"input_ci_{int(l)}_{int(b)}"
+    outarea = f"outarea_ci_{int(l)}_{int(b)}"
+    outpar = f"outpar_ci_{int(l)}_{int(b)}"
+    outlc = f"outlcs_ci_{int(l)}_{int(b)}"
+    # Include chi2
+    res = f"res_ci_{int(l)}_{int(b)}"
+    cmd = (
+        f"cat {lc} | convexinv -v -o {outarea} "
+        f"-p {outpar} {inp} {outlc} > {res}"
+        )
+    subprocess.run(cmd, shell=True)
