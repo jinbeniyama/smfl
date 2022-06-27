@@ -3,9 +3,13 @@
 """Do convex inversion.
 """
 import os 
+import time
+import multiprocessing
+import itertools
 from argparse import ArgumentParser as ap
 import numpy as np
-import subprocess
+
+from smfl import do_conv
 
 
 if __name__ == "__main__":
@@ -23,7 +27,10 @@ if __name__ == "__main__":
         "--lcdir", type=str, default=None, 
         help="lightcurve directory")
     args = parser.parse_args()
-   
+ 
+    # Starting time 
+    t0 = time.time()
+
     # Initial pole direction
     lam0  = 0
     beta0 = 0
@@ -35,19 +42,18 @@ if __name__ == "__main__":
         # Use all *lcs in lcdir
         lcdir = args.lcdir
         lc = f"{lcdir}/*lcs"
+        assert False, "Check the code for multiple lcs."
     else:
         lc = args.lc
-  
-    for l in lam:
-        for b in beta:
-            inp = f"input_ci_{int(l)}_{int(b)}"
-            outarea = f"outarea_ci_{int(l)}_{int(b)}"
-            outpar = f"outpar_ci_{int(l)}_{int(b)}"
-            outlc = f"outlcs_ci_{int(l)}_{int(b)}"
-            # Include chi2
-            res = f"res_ci_{int(l)}_{int(b)}"
-            cmd = (
-                f"cat {lc} | convexinv -v -o {outarea} "
-                f"-p {outpar} {inp} {outlc} > {res}"
-                )
-            subprocess.run(cmd, shell=True)
+
+    # Create combinations
+    params = [(l, b, lc) for l, b in itertools.product(lam, beta)]
+    print(f"  Number of iterations N_iter = {len(params)}")
+
+    n_p = 4
+    with multiprocessing.Pool(processes=n_p) as pool:
+        pool.starmap(do_conv, params)
+
+    # Ending time 
+    t1 = time.time()
+    print(f"  Elapsed time : {t1-t0:.1f} s (N_iter = {len(params)})")
