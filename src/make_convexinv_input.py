@@ -36,6 +36,21 @@ if __name__ == "__main__":
       "--Nbeta", type=int, default=1, 
       help="number of ecliptic latitude")
     parser.add_argument(
+      "-a", type=int, default=0.5, 
+      help="phase funct. param a (amplitude)")
+    parser.add_argument(
+      "-d", type=int, default=0.1, 
+      help="phase funct. param d (width)")
+    parser.add_argument(
+      "-k", type=int, default=-0.5, 
+      help="phase funct. param k (slope)")
+    parser.add_argument(
+      "-c", type=int, default=0.1, 
+      help="Lambert coefficient c")
+    parser.add_argument(
+      "--Niter", type=int, default=50, 
+      help="number of iterations")
+    parser.add_argument(
       "--fixP", action="store_true", default=False, 
       help="Fix sidereal period")
     parser.add_argument(
@@ -43,9 +58,8 @@ if __name__ == "__main__":
       help="Fix orientations")
     args = parser.parse_args()
    
-    # Initial pole direction
-    lam0  = 0
-    beta0 = 0
+
+    Niter = args.Niter
   
     lam = np.linspace(0, 360, args.Nlam)
     beta = np.linspace(-90, 90, args.Nbeta)
@@ -89,13 +103,13 @@ if __name__ == "__main__":
                 # number of rows        
                 f.write(f"8\n")
                 # phase funct. param. 'a' (0/1 - fixed/free)  
-                f.write(f"0.5 0\n")
+                f.write(f"{args.a} 0\n")
                 # phase funct. param. 'd' (0/1 - fixed/free) 
-                f.write(f"0.1 0\n")
+                f.write(f"{args.d} 0\n")
                 # phase funct. param. 'k' (0/1 - fixed/free) 
-                f.write(f"-0.5 0\n")
+                f.write(f"{args.k} 0\n")
                 # Lambert coefficient 'c' (0/1 - fixed/free)      
-                f.write(f"0.1 0\n")
+                f.write(f"{args.c} 0\n")
                 # iteration stop condition
-                f.write(f"50")
+                f.write(f"{Niter}")
                 
