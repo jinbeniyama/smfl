@@ -31,10 +31,6 @@ if __name__ == "__main__":
     # Starting time 
     t0 = time.time()
 
-    # Initial pole direction
-    lam0  = 0
-    beta0 = 0
-  
     lam = np.linspace(0, 360, args.Nlam)
     beta = np.linspace(-90, 90, args.Nbeta)
   
