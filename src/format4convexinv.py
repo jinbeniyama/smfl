@@ -13,20 +13,32 @@ Before execute this script, query JPL/HORIZONS and obtain quantities below.
   'hEcl-Lon', 'hEcl-Lat', 'r', 'rdot', 'delta', 'deldot'
 
 Read a documentation in DAMIT website about the format of output.
+
+
+Test: Conpare the output "ariadne_test", "test_lcs_rel" in DAMIT script,
+      and lc.txt in "https://astro.troja.mff.cuni.cz/projects/damit/LightCurves
+      /exportAllForAsteroid/122/plaintext/A122.lc.txt". 
+      Flux values should be ignored.
+      (JD is slightly dirrecnt between test_lcs_rel and lc.txt....)
+
+      format4convexinv.py --test
+
 """
+import sys
 from argparse import ArgumentParser as ap
 import numpy as np
 
-from smfl import format4inv, save4inv
+from obtain_JPLephem import calc_JPLephem
+from smfl import format4inv, Ariadnetestdata, save4inv
 
 
 if __name__ == "__main__":
   parser = ap(description="Fotmat lightcurves for convex inversion.")
   parser.add_argument(
-    "csv", nargs="*",
+    "--csv", nargs="*",
     help="Results of light curve observation")
   parser.add_argument(
-    "--jpl", nargs="*", required=True,
+    "--jpl", nargs="*",
     help="JPL/HORIZONS result")
   parser.add_argument(
     "--absflux", action="store_true", default=False,
@@ -46,10 +58,41 @@ if __name__ == "__main__":
   parser.add_argument(
     "--out", default="out_lcs", 
     help="output filename")
+  parser.add_argument(
+    "--test", action="store_true", default=False, 
+    help="Test for Ariadne")
   args = parser.parse_args()
  
+
+  # Test
+  # Need JPL ephemeris before this script.
+  if args.test:
+      # Save Ariadnetestdata
+      df_phot = Ariadnetestdata()
+      csv_Ariadne = "Ariadnetest_data.csv"
+      df_phot.to_csv(csv_Ariadne, sep=" ", index=False)
+
+      # Save Ariadne JPL ephemeris
+      # date0, date1 = "1965-05-01", "1965-05-02"
+      # step, code = "1m", "381"
+      # eph = calc_JPLephem("Ariadne", date0, date1, step, code)
+      # jpl_Ariadne = "Ariadnetestephem.csv"
+      # eph.write(jpl_Ariadne, format="pandas.csv", sep=" ")
+
+      # Save Ariadne JPL ephemeris by hand
+      # Leiden Station, Johannesburg (observatory) [code: 081]3 
+      # Reference : vanHouten-Groeneveld et al. 1979
+      jpl_Ariadne = "Ariadnetest_jpl.csv"
+    
+      df_phot = format4inv(csv_Ariadne, jpl_Ariadne, args.key_jd)
+      out = f"test_Ariadne"
+      save4inv(
+          [df_phot], args.absflux, random, args.key_jd, args.key_flux,
+          args.key_fluxerr, out)
+      sys.exit()
+
   assert len(args.csv)==len(args.jpl), "phot/jpl res should be the same dim"
-  
+
   result = []
   # Extract object info
   for csv,jpl in zip(args.csv, args.jpl):
