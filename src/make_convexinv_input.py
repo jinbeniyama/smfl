@@ -2,12 +2,20 @@
 # -*- coding: utf-8 -*-
 """
 Make input files of convexinv.
-"""
-import os 
-from argparse import ArgumentParser as ap
-import numpy as np
 
-"""Template
+Note from convexinv_doc.pdf
+---------------------------
+Start with, e.g., a = 0.5, d = 0.1, k = −0.5. 
+If you use only relative lightcurves, no solar phase function is needed 
+(i.e., relative fit with almost constant solar phase for each lightcurve), 
+then use fixed values of phase function parameters with zero amplitude 
+and slope. 
+Fitting the phase parameters using relative data leads to divergence. 
+The parameter c has usually only little effect on the solution 
+so you can fix it at, e.g., c = 0.1. 
+
+Template
+--------
 100		0	inital lambda [deg] (0/1 - fixed/free)
 100		0	initial beta [deg] (0/1 - fixed/free)
 0.0143		1	inital period [hours] (0/1 - fixed/free)
@@ -21,7 +29,12 @@ import numpy as np
 -0.5		0	phase funct. param. 'k' (0/1 - fixed/free)
 0.1		0	Lambert coefficient 'c' (0/1 - fixed/free)
 50			iteration stop condition
+--------
+
 """
+import os 
+from argparse import ArgumentParser as ap
+import numpy as np
 
 
 if __name__ == "__main__":
