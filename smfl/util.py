@@ -39,11 +39,25 @@ def time_keeper(func):
         return result
     return wrapper
 
+def Ariadnetestdata():
+    # The time is same with test_lcs_rel in DAMIT code, not the text on website.
+    dic_temp = dict(
+        t_jd_ltcor=[
+            2438882.233275, 2438882.237650, 2438882.241400, 2438882.245817,
+            2438882.249192, 2438882.254275, 2438882.256984, 2438882.261359,
+            2438882.264442, 2438882.270525],
+        flux=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        )
+    # JD is light-time corrected
+    df = pd.DataFrame(dic_temp.values(), index=dic_temp.keys()).T
+    return df
+
 
 def format4inv(lc, jpleph, key_jd):
     """
     Format lightcurves for convex inversion.
 
+    jpleph should be queried by hand using columns 1,2,18,19,20.
     # ToDo: lc and jpleph should be array-like 
 
     Parameters
@@ -69,29 +83,33 @@ def format4inv(lc, jpleph, key_jd):
     x_earth_list, y_earth_list, z_earth_list = [], [], []
     with open(jpleph, "r") as f:
         # skip header of jpl ephem 
-        n_header = 84
+        n_header = 76
         #n_use = 121
         #f = f.readlines()[n_header:n_header+n_use]
         f = f.readlines()[n_header:]
         for line in f:
           # ok
           utc = line[1:18]
-          other = line[18:]
+          # Ignore m and A and ...
+          other = line[22:]
           # Split by space
           other = other.split(" ")
           # Replace "\n" with ""
           other = [x.replace("\n", "") for x in other]
           other = [x for x in other if x != ""]
-          if len(other)!=19:
+
+
+          ## Checl!
+          if len(other)!=18:
               continue
 
           utc_list.append(utc)
-          ra    = f"{other[1]} {other[2]} {other[3]}"
-          dec   = f"{other[4]} {other[5]} {other[6]}"
-          beta  = f"{other[13]}"
-          lam   = f"{other[14]}"
-          r     = f"{other[15]}"
-          delta = f"{other[17]}"
+          ra    = f"{other[0]} {other[1]} {other[2]}"
+          dec   = f"{other[3]} {other[4]} {other[5]}"
+          beta  = f"{other[12]}"
+          lam   = f"{other[13]}"
+          r     = f"{other[14]}"
+          delta = f"{other[16]}"
 
           ra_list.append(ra)
           dec_list.append(dec)
@@ -161,9 +179,10 @@ def format4inv(lc, jpleph, key_jd):
         x_sun=x_sun_list, y_sun=y_sun_list, z_sun=z_sun_list,
         x_earth=x_earth_list, y_earth=y_earth_list, z_earth=z_earth_list
         )
+
+    # JD is not light-time corrected
     df_temp = pd.DataFrame(dic_temp.values(), index=dic_temp.keys()).T
-
-
+    
     # function to predict various values when observation
     f_sun_x = interpolate.interp1d(
         df_temp["jd"], df_temp["x_sun"], kind='linear', fill_value='extrapolate')
@@ -179,6 +198,7 @@ def format4inv(lc, jpleph, key_jd):
         df_temp["jd"], df_temp["z_earth"], kind='linear', fill_value='extrapolate')
     
     # Read photometric csv
+    # light-time corrected unlike ephemerides from JPL
     df = pd.read_csv(lc, sep=" ")
     col = df.columns.tolist()
 
@@ -225,6 +245,7 @@ def save4inv(result, absflux, random, key_jd, key_flux, key_fluxerr, out):
         for n in range(N):
             # n-th lightcurve
             df = result[n]
+
             if random:
                 # Monte Carlo 
                 flux_mc = np.random.normal(
