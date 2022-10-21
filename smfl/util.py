@@ -302,3 +302,36 @@ def do_conv(lam, beta, lc):
         f"-p {outpar} {inp} {outlc} > {res}"
         )
     subprocess.run(cmd, shell=True)
+
+
+def calc_JPLephem(asteroid, date0, date1, step, obscode, air=False):
+    """
+    Calculate asteroid ephemeris.
+  
+    Parameters
+    ----------
+    asteroid : str
+      asteroid name like "Ceres", "2019 FA" (should have space)
+    date0 : str
+      ephemeris start date like "2020-12-12"
+    date1 : str
+      ephemeris end date like "2020-12-12"
+    step : str
+      ephemeris step date like '1d' for 1-day, '30m' for 30-minutes
+    obscode : str, optional
+      IAU observation code. 
+      371:Okayama Astronomical Observatory
+      381:Kiso observatory
+    air : bool, optional
+      whether consider air pressure
+  
+    Return
+    ------
+    ephem : astropy.table.table.Table
+      calculated ephemeris
+    """
+  
+    obj = Horizons(id=asteroid, location=obscode,
+          epochs={'start':date0, 'stop':date1, 'step':step})
+    eph = obj.ephemerides(refraction=air)
+    return eph

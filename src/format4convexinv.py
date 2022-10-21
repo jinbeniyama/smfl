@@ -25,11 +25,10 @@ Test: Conpare the output "ariadne_test", "test_lcs_rel" in DAMIT script,
 
 """
 import sys
-from argparse import ArgumentParser as ap
 import numpy as np
+from argparse import ArgumentParser as ap
 
-from obtain_JPLephem import calc_JPLephem
-from smfl import format4inv, Ariadnetestdata, save4inv
+from smfl import format4inv, Ariadnetestdata, save4inv, calc_JPLephem
 
 
 if __name__ == "__main__":
