@@ -23,10 +23,10 @@ format4convexinv.py (lc1) (lc2) (lc3) --jpl (jpl1) (jpl2) (jpl3) --obj (obj) --o
 
 2. Search sidereal period with period_scan.
 ```
-[single lightcurve] 
+[single lightcurve]
 search_sidP.py (lc) --inp (inputfile) --out (out)
 
-[multiple lightcurve for MC technique] 
+[multiple lightcurve for MC technique]
 search_sidP.py (lc1) (lc2) --inp (inputfile) --out (out)
 ```
 
