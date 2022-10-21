@@ -1,5 +1,6 @@
 # Shape Modeling From Lightcurves (smfl)
 [developer mail](mailto:beniyama@ioa.s.u-tokyo.ac.jp)
+
 [Document in Japanese](http://www.ioa.s.u-tokyo.ac.jp/~beniyama/pdf/DAMIT_JB.pdf)
 
 ## Overview
@@ -10,8 +11,9 @@ All what needed in this script is a text file with
 After procedures 1 to 8, shape model can be created with an arbitrary software.
 
 
-### Procedure
+## Procedures
 1. Format lightcurves with aspect data from JPL ephemerides.
+
 ```
 [for periodic analysis with MC technique] 
 format4convexinv.py (lc1) --jpl (jpl1) --N_mc (N) --obj (obj) --out (lcs_all)
@@ -21,6 +23,7 @@ format4convexinv.py (lc1) (lc2) (lc3) --jpl (jpl1) (jpl2) (jpl3) --obj (obj) --o
 ```
 
 2. Search sidereal period with period_scan.
+
 ```
 [single lightcurve] 
 search_sidP.py (lc) --inp (inputfile) --out (out)
