@@ -13,7 +13,6 @@ After procedures 1 to 8, shape model can be created with an arbitrary software.
 
 ## Procedures
 1. Format lightcurves with aspect data from JPL ephemerides.
-
 ```
 [for periodic analysis with MC technique]
 format4convexinv.py (lc1) --jpl (jpl1) --N_mc (N) --obj (obj) --out (lcs_all)
@@ -23,7 +22,6 @@ format4convexinv.py (lc1) (lc2) (lc3) --jpl (jpl1) (jpl2) (jpl3) --obj (obj) --o
 ```
 
 2. Search sidereal period with period_scan.
-
 ```
 [single lightcurve] 
 search_sidP.py (lc) --inp (inputfile) --out (out)
