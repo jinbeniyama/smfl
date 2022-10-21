@@ -13,10 +13,10 @@ All what needed in the procedure is time (jd), flux (, and fluxerr) text!
 `format4convexinv.py`
 
 2. Search sidereal period with period_scan.
-`search_sidP.py`
+`search_sidP.py lc input out`
 
 3. Plot sidereal period vs. chi2.
-`plot_sidP_chi2.py`
+`plot_sidP_chi2.py obj outputofsearch`
 
 4. Make input files of convexinv.
 `make_convexinv_input.py`
@@ -29,6 +29,9 @@ All what needed in the procedure is time (jd), flux (, and fluxerr) text!
 
 7. Convert model to stl.
 `model2stl.py`
+
+8. Plot lightcurves with model curves.
+`plot_lcs_with_model.py`
 
 Then, shape model can be created with an arbitrary software.
 
