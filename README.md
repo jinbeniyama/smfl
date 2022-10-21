@@ -32,10 +32,10 @@ search_sidP.py (lc1) (lc2) --inp (inputfile) --out (out)
 
 3. Plot sidereal period vs. chi2.
 ```
-[single lightcurve] 
+[single lightcurve]
 plot_sidP_chi2.py (obj) (out of 2.)
 
-[multiple lightcurve for MC technique] 
+[multiple lightcurve for MC technique]
 plot_sidP_chi2.py (obj) (out of 2.-1) (out of 2.-2) (out of 2.-3)
 ```
 
@@ -54,22 +54,24 @@ do_convexinv.py --Nlam (number of longitude) --Nbeta (number of latitude)
 ```
 
 6. Plot pole solution with chi2.
-Is there any idea to know numbers of rows include chi2, period, and dark facet area?
 ```
+[Is there any idea to know numbers of rows include chi2, period, and dark facet area?]
 plot_polesolution.py --Nlam (number of longitude) --Nbeta (number of latitude) 
 --N_chi2 (number of row includes chi2 in output of 5.) 
 --N_P (number of row includes Period in output of 5.) 
 --N_dfac (number of row includes dark facet area in output of 5.) --norm
 ```
 
-7. Convert model to stl. (in prep.)
+7. Convert model to stl.
 ```
+[in prep.]
 model2stl.py (model)
 ```
 
 
-8. Plot lightcurves with model curves. (in prep.)
+8. Plot lightcurves with model curves.
 ```
+[in prep.]
 plot_lcs_with_model.py
 ```
 
