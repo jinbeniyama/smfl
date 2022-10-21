@@ -105,6 +105,7 @@ if __name__ == "__main__":
     Z_dfac = Z_dfac.reshape(xx.shape)
 
     fig = plt.figure(figsize=(8, 14))
+
     ax1 = fig.add_axes([0.15, 0.72, 0.63, 0.25])
     cax1 = fig.add_axes([0.80, 0.72, 0.03, 0.25])
 
@@ -113,6 +114,12 @@ if __name__ == "__main__":
 
     ax3 = fig.add_axes([0.15, 0.08, 0.63, 0.25])
     cax3 = fig.add_axes([0.80, 0.08, 0.03, 0.25])
+
+    # ToDo : Avoid "+1e5" etc. 
+    import matplotlib
+    y_formatter = matplotlib.ticker.ScalarFormatter(useOffset=False)
+    cax2.yaxis.set_major_formatter(y_formatter)
+    cax2.xaxis.set_major_formatter(y_formatter)
     
     ax1.set_xlabel(r"$\lambda$ [deg]")
     ax2.set_xlabel(r"$\lambda$ [deg]")
