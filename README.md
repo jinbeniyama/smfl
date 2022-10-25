@@ -4,11 +4,11 @@
 [Document in Japanese](http://www.ioa.s.u-tokyo.ac.jp/~beniyama/pdf/DAMIT_JB.pdf)
 
 ## Overview
-
 Do shape modeling of minor bodied from lightcurves.
 All what needed in this script is a text file with 
 `time (jd)` and `flux` (and `fluxerr`).
 After procedures 1 to 8, shape model can be created with an arbitrary software.
+This repository optimizes the public code in [DAMIT](https://astro.troja.mff.cuni.cz/projects/damit/).
 
 
 
@@ -81,7 +81,11 @@ plot_lcs_with_model.py
 Please install by pip, otherwise open paths to src and smlf directories by yourself.
 ## Usage
 
-## Note
+## Acknowledgments
+I would like to express the gratitude to the people involved in [DAMIT](https://astro.troja.mff.cuni.cz/projects/damit/).
+The original paper of DAMIT is 
+[Ďurech et al. (2010), DAMIT: a database of asteroid models, A&A, 513, A46](https://ui.adsabs.harvard.edu/abs/2010A%26A...513A..46D).
+
 
 ## Dependencies
 
