@@ -38,15 +38,6 @@ def chi2_CI(N=2, M=1, nu=None, sigma=3):
 if __name__ == "__main__":
     parser = ap(description="Plot result of convex inversion.")
     parser.add_argument(
-        "--N_chi2", type=int, default=1, 
-        help="number of row includes chi square")
-    parser.add_argument(
-        "--N_P", type=int, default=1, 
-        help="number of row includes rotP")
-    parser.add_argument(
-        "--N_dfac", type=int, default=1, 
-        help="number of row includes dark facet area")
-    parser.add_argument(
         "--Nlam", type=int, default=1, 
         help="number of ecliptic longitude")
     parser.add_argument(
@@ -73,10 +64,6 @@ if __name__ == "__main__":
     Nlam = args.Nlam
     Nbeta = args.Nbeta
     
-    N_chi2 = args.N_chi2
-    N_P = args.N_P
-    N_dfac = args.N_dfac
-
     # Normalization
     norm = args.norm
 
@@ -96,29 +83,41 @@ if __name__ == "__main__":
         res = f"res_ci_{int(l)}_{int(b)}"
         res = os.path.join(args.resdir, res)
         with open(res, "r") as f:
-            lines = f.readlines()
+
+            # Extract last 2 + 5 columns
+            lines = f.readlines()[-7:]
+            # === example ===
+            # 50  chi2 4.710719  dev 0.055289  alambda 0.001000
+            #
+            # lambda, beta and period (hrs): 360.000000 -90.000000 0.014347
+            # phase function parameters: 0.000000 0.100000 0.000000 
+            # Lambert coefficient: 0.1
+            # plus a dark facet with area 1.28%
+            # === example ===
 
             # Extract chi2
-            line = lines[N_chi2-1:N_chi2]
-            line = line[0].split("chi2")[-1]
+            line = lines[0]
+            line = line.split("chi2")[-1]
             line = line.split("dev")[0]
             chi2 = line.strip(" ")
 
             # Extract rotP
-            line = lines[N_P-1:N_P]
-            line = line[0].split(" ")
+            line = lines[2]
+            print(line)
+            line = line.split(" ")
             rotP = line[-1].strip("\n")
             # hour to sec
             rotP = float(rotP)*3600.
 
             # Extract dfac (dark facet area)
-            line = lines[N_dfac-1:N_dfac]
-            line = line[0].split(" ")
+            line = lines[5]
+            line = line.split(" ")
             dfac = line[-1].strip("%\n")
 
             chi2_list.append(float(chi2))
             rotP_list.append(float(rotP))
             dfac_list.append(float(dfac))
+
 
     chi2_min = np.min(chi2_list)
     if norm:
@@ -173,13 +172,13 @@ if __name__ == "__main__":
     print(f"{sigma}-sigma CI is {CI:.2f}")
     print(f"{sigma}-sigma range is chi2_min to chi2_min + CI")
     print(f"  -> chi2: {chi2_min:.2f} to {chi2_min + CI:.2f}")
+    # Add CI line
+    levels = [chi2_min + CI]
+    ax1.contour(xx, yy, Z_chi2, levels, linestyles=["dashed"], colors="white")
 
     im = ax2.contourf(xx, yy, Z_rotP, zorder=-1, cmap=cm)
     cbar = fig.colorbar(
         im,  cax=cax2, orientation='vertical', label=r"$Period [s]$")
-    # Add CI line
-    levels = [chi2_min + CI]
-    ax1.contour(xx, yy, Z_chi2, levels, linestyles=["dashed"], colors="white")
 
     im = ax3.contourf(xx, yy, Z_dfac, zorder=-1, cmap=cm)
     cbar = fig.colorbar(
