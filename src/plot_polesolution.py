@@ -1,6 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""Plot convex inversion results.
+"""
+Plot convex inversion results.
+Uncertainty is estimated in the same manner as the previous papers
+such as Vokrouhlicky et al. (2011, 2017) and Durech et al. (2018).
+
+References
+----------
+Vokrouhlicky et al. 2011, AJ, 142, 159.
+Vokrouhlicky et al. 2017, AJ, 153, 270.
+Durech et al. 2018, AA, 609, A86.
 """
 import os 
 from argparse import ArgumentParser as ap
