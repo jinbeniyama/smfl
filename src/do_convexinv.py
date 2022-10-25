@@ -27,26 +27,36 @@ if __name__ == "__main__":
         "--lc", type=str, default=None, 
         help="preprocessed lightcurve")
     parser.add_argument(
-        "--lcdir", type=str, default=None, 
+        "--lcdir", type=str, default=".", 
         help="lightcurve directory")
+    parser.add_argument(
+        "--inpdir", type=str, default="convex_input",
+        help="Directory for input file of convexinv")
+    parser.add_argument(
+        "--outdir", type=str, default="convex_result",
+        help="Directory for input file of convexinv")
     args = parser.parse_args()
  
+    outdir = args.outdir
+    os.makedirs(outdir, exist_ok=True)
+    inpdir = args.inpdir
+    lcdir = args.lcdir
+
     # Starting time 
     t0 = time.time()
 
     lam = np.linspace(0, 360, args.Nlam)
     beta = np.linspace(-90, 90, args.Nbeta)
   
-    if args.lcdir:
-        # Use all *lcs in lcdir
-        lcdir = args.lcdir
-        lc = f"{lcdir}/*lcs"
-        assert False, "Check the code for multiple lcs."
-    else:
-        lc = args.lc
+    # TODO: accept multiple input
+    # Use all *lcs in lcdir
+    #lc = f"{lcdir}/*lcs"
+    #assert False, "Check the code for multiple lcs."
+    lc = args.lc
 
     # Create combinations
-    params = [(l, b, lc) for l, b in itertools.product(lam, beta)]
+    params = [(l, b, lc, lcdir, inpdir, outdir) 
+        for l, b in itertools.product(lam, beta)]
     print(f"  Number of iterations N_iter = {len(params)}")
 
     n_p = args.N_p

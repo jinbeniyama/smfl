@@ -274,18 +274,25 @@ def save4inv(result, absflux, random, key_jd, key_flux, key_fluxerr, out):
                     f"\n")
 
 
-def do_conv(lam, beta, lc):
+def do_conv(lam, beta, lc, lcdir=".", inpdir=".", outdir="."):
     """
     Do convex inversion.
+    All results are saved in oudir.
 
     Parameters
     ----------
     lam : float
-        longitude
+      longitude
     beta : float
-        latitude
+      latitude
     lc : str
-        lightcurve
+      lightcurve
+    lcdir : str
+      directory for lc, optional
+    inpdir : str
+      directory for input file, optional
+    outdir : str
+      directory for output file, optional
     """
     l = lam
     b = beta
@@ -298,8 +305,8 @@ def do_conv(lam, beta, lc):
     # Include chi2
     res = f"res_ci_{int(l)}_{int(b)}"
     cmd = (
-        f"cat {lc} | convexinv -v -o {outarea} "
-        f"-p {outpar} {inp} {outlc} > {res}"
+        f"cat {lcdir}/{lc} | convexinv -v -o {outdir}/{outarea} "
+        f"-p {outdir}/{outpar} {inpdir}/{inp} {outdir}/{outlc} > {outdir}/{res}"
         )
     subprocess.run(cmd, shell=True)
 
