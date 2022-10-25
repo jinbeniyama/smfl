@@ -11,6 +11,7 @@ All what needed in this script is a text file with
 After procedures 1 to 8, shape model can be created with an arbitrary software.
 
 
+
 ## Procedures
 1. Format lightcurves with aspect data from JPL ephemerides.
 ```
@@ -22,6 +23,7 @@ format4convexinv.py (lc1) (lc2) (lc3) --jpl (jpl1) (jpl2) (jpl3) --obj (obj) --o
 ```
 
 2. Search sidereal period with period_scan.
+The result of `period_scan` is saved in the current directory.
 ```
 [single lightcurve]
 search_sidP.py (lc) --inp (inputfile) --out (out)
@@ -40,14 +42,16 @@ plot_sidP_chi2.py (obj) (out of 2.-1) (out of 2.-2) (out of 2.-3)
 ```
 
 4. Make input files of convexinv.
-Input files of convexinv (e.g., input_ci_0_-90) are saved in `convex_input`.
+Input files of convexinv (e.g., input_ci_0_-90) are saved in `convex_input` by default.
 ```
 [pole fixed]
 make_convexinv_input.py --sidP (sidereal period in hour) 
 --Nlam (number of longitude) --Nbeta (number of latitude)  --fixpole
 ```
 
-5. Conduct convexinv.
+5. Do convexinv.
+Input files of convexinv (e.g., input_ci_0_-90) in `convex_input` are used by default.
+All results and intermediate files of convexinv (e.g., outarea_ci_0_-90, outlcs_ci_0_-90, outpar_ci_0_-90, res_ci_0_-90) are saved in `convex_result` by default.
 ```
 [Nlam and Nbeta should be the same with 4.]
 do_convexinv.py --Nlam (number of longitude) --Nbeta (number of latitude) 
@@ -55,12 +59,9 @@ do_convexinv.py --Nlam (number of longitude) --Nbeta (number of latitude)
 ```
 
 6. Plot pole solution with chi2.
+Image is saved in the current directory.
 ```
-[Is there any idea to know numbers of rows include chi2, period, and dark facet area?]
-plot_polesolution.py --Nlam (number of longitude) --Nbeta (number of latitude) 
---N_chi2 (number of row includes chi2 in output of 5.) 
---N_P (number of row includes Period in output of 5.) 
---N_dfac (number of row includes dark facet area in output of 5.) --norm
+plot_polesolution.py --Nlam (number of longitude) --Nbeta (number of latitude) --norm
 ```
 
 7. Convert model to stl.
