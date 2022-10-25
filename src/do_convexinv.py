@@ -33,12 +33,12 @@ if __name__ == "__main__":
         "--inpdir", type=str, default="convex_input",
         help="Directory for input file of convexinv")
     parser.add_argument(
-        "--outdir", type=str, default="convex_result",
-        help="Directory for input file of convexinv")
+        "--resdir", type=str, default="convex_result",
+        help="Directory for results of convexinv")
     args = parser.parse_args()
  
-    outdir = args.outdir
-    os.makedirs(outdir, exist_ok=True)
+    resdir = args.resdir
+    os.makedirs(resdir, exist_ok=True)
     inpdir = args.inpdir
     lcdir = args.lcdir
 
@@ -55,7 +55,7 @@ if __name__ == "__main__":
     lc = args.lc
 
     # Create combinations
-    params = [(l, b, lc, lcdir, inpdir, outdir) 
+    params = [(l, b, lc, lcdir, inpdir, resdir) 
         for l, b in itertools.product(lam, beta)]
     print(f"  Number of iterations N_iter = {len(params)}")
 
