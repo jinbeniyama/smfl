@@ -6,6 +6,33 @@ import os
 from argparse import ArgumentParser as ap
 import numpy as np
 import matplotlib.pyplot as plt  
+import matplotlib
+
+
+def chi2_CI(N=2, M=1, nu=None, sigma=3):
+    """
+    Calculate confidense interval (CI) of chi2 distribution.
+    
+    Parameters
+    ----------
+    N : int
+      number of observations
+    M : int
+      number of parameters in convex inv
+    nu : int, optional 
+      degree of freedom of chi2 distribution (N-M)
+    sigma : int
+      confidence level
+
+    Return
+    ------
+    CI : float
+      n-sigma confidence interval in percentage
+    """
+    if not nu:
+        nu = N - M
+    CI = sigma*np.sqrt(2/nu)*100
+    return CI
 
 
 if __name__ == "__main__":
@@ -26,11 +53,17 @@ if __name__ == "__main__":
         "--Nbeta", type=int, default=1, 
         help="number of ecliptic latitude")
     parser.add_argument(
+        "--nu", type=int, default=1000, 
+        help="degree of freedom ")
+    parser.add_argument(
         "--norm", action="store_true", default=False,
         help="Normalize chi2 by the minimum")
     parser.add_argument(
         "--outtype", type=str, default="png",
         help="format of output figures")
+    parser.add_argument(
+        "--resdir", type=str, default="convex_result",
+        help="Directory for results of convexinv")
     args = parser.parse_args()
  
     # Color map
@@ -61,6 +94,7 @@ if __name__ == "__main__":
     for x in data:
         l, b = x[0], x[1]
         res = f"res_ci_{int(l)}_{int(b)}"
+        res = os.path.join(args.resdir, res)
         with open(res, "r") as f:
             lines = f.readlines()
 
@@ -85,8 +119,10 @@ if __name__ == "__main__":
             chi2_list.append(float(chi2))
             rotP_list.append(float(rotP))
             dfac_list.append(float(dfac))
+
+    chi2_min = np.min(chi2_list)
     if norm:
-        Z_chi2 = [x/np.min(chi2_list) for x in chi2_list]
+        Z_chi2 = [x/chi2_min for x in chi2_list]
         # percentage from the minima
         Z_chi2 = [(x-1)*100 for x in Z_chi2]
 
@@ -115,8 +151,6 @@ if __name__ == "__main__":
     ax3 = fig.add_axes([0.15, 0.08, 0.63, 0.25])
     cax3 = fig.add_axes([0.80, 0.08, 0.03, 0.25])
 
-    # ToDo : Avoid "+1e5" etc. 
-    import matplotlib
     y_formatter = matplotlib.ticker.ScalarFormatter(useOffset=False)
     cax2.yaxis.set_major_formatter(y_formatter)
     cax2.xaxis.set_major_formatter(y_formatter)
@@ -131,10 +165,21 @@ if __name__ == "__main__":
     im = ax1.contourf(xx, yy, Z_chi2, zorder=-1, cmap=cm)
     cbar = fig.colorbar(
         im,  cax=cax1, orientation='vertical', label=label_chi2)
+    
+    # How to calculate nu ?
+    nu = args.nu
+    sigma = 3
+    CI = chi2_CI(nu=nu, sigma=sigma)
+    print(f"{sigma}-sigma CI is {CI:.2f}")
+    print(f"{sigma}-sigma range is chi2_min to chi2_min + CI")
+    print(f"  -> chi2: {chi2_min:.2f} to {chi2_min + CI:.2f}")
 
     im = ax2.contourf(xx, yy, Z_rotP, zorder=-1, cmap=cm)
     cbar = fig.colorbar(
         im,  cax=cax2, orientation='vertical', label=r"$Period [s]$")
+    # Add CI line
+    levels = [chi2_min + CI]
+    ax1.contour(xx, yy, Z_chi2, levels, linestyles=["dashed"], colors="white")
 
     im = ax3.contourf(xx, yy, Z_dfac, zorder=-1, cmap=cm)
     cbar = fig.colorbar(
