@@ -40,6 +40,7 @@ plot_sidP_chi2.py (obj) (out of 2.-1) (out of 2.-2) (out of 2.-3)
 ```
 
 4. Make input files of convexinv.
+Input files of convexinv (e.g., input_ci_0_-90) are saved in `convex_input`.
 ```
 [pole fixed]
 make_convexinv_input.py --sidP (sidereal period in hour) 
