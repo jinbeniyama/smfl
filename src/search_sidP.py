@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""Search siderial period (sidP) with period_scan.
+"""
+Search siderial period (sidP) with period_scan.
 """
 from argparse import ArgumentParser as ap
 import numpy as np
@@ -19,6 +20,7 @@ if __name__ == "__main__":
         "--out", type=str, 
         help="output file of period_scan")
     args = parser.parse_args()
+
 
     if args.out:
         out = args.out
