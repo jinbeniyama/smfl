@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Make input files of convexinv.
+Make input files of convexinv in outdir/.
 
 Note from convexinv_doc.pdf
 ---------------------------
@@ -69,8 +69,13 @@ if __name__ == "__main__":
     parser.add_argument(
       "--fixpole", action="store_true", default=False, 
       help="Fix orientations")
+    parser.add_argument(
+        "--inpdir", type=str, default="convex_input",
+        help="Directory for input file of convexinv")
     args = parser.parse_args()
    
+    outdir = args.inpdir
+    os.makedirs(outdir, exist_ok=True)
 
     Niter = args.Niter
   
@@ -101,6 +106,7 @@ if __name__ == "__main__":
     for l in lam:
         for b in beta:
             out = f"input_ci_{int(l)}_{int(b)}"
+            out = os.path.join(outdir, out)
             with open(out, "w") as f:
                 f.write(f"{l} {fix_lambda}\n")
                 f.write(f"{b} {fix_beta}\n")
