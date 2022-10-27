@@ -342,3 +342,32 @@ def calc_JPLephem(asteroid, date0, date1, step, obscode, air=False):
           epochs={'start':date0, 'stop':date1, 'step':step})
     eph = obj.ephemerides(refraction=air)
     return eph
+
+
+def nobs_lc(lc):
+    """
+    Count the number of observations of a lightcurve.
+
+    Parameter
+    ---------
+    lc : str
+      lightcurve (text file)
+
+    Return
+    ------
+    N_obs : int
+      the number of observations
+    """
+    with open (lc, "r") as f:
+        lines = f.readlines()
+        lines = [x.replace("\n", "") for x in lines]
+        N_all = len(lines)
+        N_lc = lines[0]
+        N_header = int(N_lc) + 1
+        N_obs = N_all - N_header
+        return N_obs
+    
+
+
+
+

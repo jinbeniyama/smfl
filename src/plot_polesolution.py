@@ -4,6 +4,17 @@
 Plot convex inversion results.
 Uncertainty is estimated in the same manner as the previous papers
 such as Vokrouhlicky et al. (2011, 2017) and Durech et al. (2018).
+The lightcurve is needed as an argument to calculate the number of observations N.
+
+
+TODO
+----
+To calculate the number of degree of freedom, nu = N - M,
+this code assumes M = 100 (i.e., nu = N - 100).
+This does not change the result for normal shape modeling (N >> 100),
+but I personally feel the exact number (M and N) should be writen 
+in the manuscript if you are writing a paper.
+
 
 References
 ----------
@@ -16,6 +27,8 @@ from argparse import ArgumentParser as ap
 import numpy as np
 import matplotlib.pyplot as plt  
 import matplotlib
+
+from smfl import nobs_lc
 
 
 def chi2_CI(N=2, M=1, nu=None, sigma=3):
@@ -40,7 +53,10 @@ def chi2_CI(N=2, M=1, nu=None, sigma=3):
     """
     if not nu:
         nu = N - M
-    CI = sigma*np.sqrt(2/nu)*100
+    # For reduced chi2
+    CI = sigma*np.sqrt(2/nu)
+    ## For normal chi2
+    #CI = sigma*np.sqrt(2*nu)
     return CI
 
 
@@ -55,6 +71,12 @@ if __name__ == "__main__":
     parser.add_argument(
         "--nu", type=int, default=1000, 
         help="degree of freedom ")
+    parser.add_argument(
+        "--lc", type=str, default=None, 
+        help="Formatted lightcurve to calculate the number of obs.")
+    parser.add_argument(
+        "--sigma", type=float, default=3, 
+        help="CI level")
     parser.add_argument(
         "--norm", action="store_true", default=False,
         help="Normalize chi2 by the minimum")
@@ -175,14 +197,19 @@ if __name__ == "__main__":
         im,  cax=cax1, orientation='vertical', label=label_chi2)
     
     # How to calculate nu ?
-    nu = args.nu
-    sigma = 3
-    CI = chi2_CI(nu=nu, sigma=sigma)
-    print(f"{sigma}-sigma CI is {CI:.2f}")
-    print(f"{sigma}-sigma range is chi2_min to chi2_min + CI")
-    print(f"  -> chi2: {chi2_min:.2f} to {chi2_min + CI:.2f}")
+    # Assume nu = N - M ~ N (i.e., N >> M)
+    if args.lc:
+        N = nobs_lc(args.lc)
+        nu = N
+    else:
+        nu = args.nu
+    CI = chi2_CI(nu=nu, sigma=args.sigma)
+    print(f"{args.sigma}-sigma CI is {CI:.2f}")
+    # Where from?
+    print(f"{args.sigma}-sigma range is chi2_min to chi2_min(1 + CI)")
+    print(f"  -> chi2: {chi2_min:.2f} to {chi2_min*(1 + CI):.2f}")
     # Add CI line
-    levels = [chi2_min + CI]
+    levels = [chi2_min*(1 + CI)]
     ax1.contour(xx, yy, Z_chi2, levels, linestyles=["dashed"], colors="white")
 
     im = ax2.contourf(xx, yy, Z_rotP, zorder=-1, cmap=cm)
