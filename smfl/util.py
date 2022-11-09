@@ -24,6 +24,23 @@ import astropy
 from astropy.time import Time
 
 
+def adderr(*args):
+    """Calculate additional error.
+
+    Parameters
+    ----------
+    args : array-like
+        list of values
+
+    Return
+    ------
+    err : float
+        calculated error
+    """
+    err = np.sqrt(np.sum(np.square(args)))
+    return err
+
+
 def time_keeper(func):
     """
     Decorator to measure time.
@@ -39,6 +56,7 @@ def time_keeper(func):
         return result
     return wrapper
 
+
 def Ariadnetestdata():
     # The time is same with test_lcs_rel in DAMIT code, not the text on website.
     dic_temp = dict(
@@ -53,7 +71,7 @@ def Ariadnetestdata():
     return df
 
 
-def format4inv(lc, jpleph, key_jd):
+def format4inv(df, jpleph, key_jd):
     """
     Format lightcurves for convex inversion.
 
@@ -62,8 +80,8 @@ def format4inv(lc, jpleph, key_jd):
 
     Parameters
     ----------
-    lc : str
-        filename of lightcurve data
+    df : str
+        dataframe of lightcurve 
     jpleph : str
         filename of ephemeris from JPL
     key_jd : str
@@ -199,7 +217,6 @@ def format4inv(lc, jpleph, key_jd):
     
     # Read photometric csv
     # light-time corrected unlike ephemerides from JPL
-    df = pd.read_csv(lc, sep=" ")
     col = df.columns.tolist()
 
     # predict x, y, z of the Sun and the Earth 
@@ -212,7 +229,8 @@ def format4inv(lc, jpleph, key_jd):
     return df
 
 
-def save4inv(result, absflux, random, key_jd, key_flux, key_fluxerr, out):
+def save4inv(
+    result, absflux, random, key_jd, key_flux, key_fluxerr, out):
     """
     Save formatted text for convex inversion.
 
@@ -232,6 +250,8 @@ def save4inv(result, absflux, random, key_jd, key_flux, key_fluxerr, out):
         keyword of flux uncertainty
     out : str
         output filename
+    tbin : str, optional
+        widht of time bin
 
     Return
     ------
@@ -277,7 +297,7 @@ def save4inv(result, absflux, random, key_jd, key_flux, key_fluxerr, out):
 def do_conv(lam, beta, lc, lcdir=".", inpdir=".", outdir="."):
     """
     Do convex inversion.
-    All results are saved in oudir.
+    All results are saved in outdir.
 
     Parameters
     ----------
@@ -311,8 +331,45 @@ def do_conv(lam, beta, lc, lcdir=".", inpdir=".", outdir="."):
     subprocess.run(cmd, shell=True)
 
 
+def do_conv_final(lam, beta, lc, lcdir=".", inpdir=".", outdir="."):
+    """
+    Do convex inversion.
+    All results are saved in outdir.
+
+    Parameters
+    ----------
+    lam : float
+      longitude
+    beta : float
+      latitude
+    lc : str
+      lightcurve
+    lcdir : str
+      directory for lc, optional
+    inpdir : str
+      directory for input file, optional
+    outdir : str
+      directory for output file, optional
+    """
+    l = lam
+    b = beta
+    print(f"  (lam, beta) = ({l:.1f}, {b:.1f})")
+
+    inp = f"input_ci_{int(l)}_{int(b)}"
+    model = f"model_ci_{int(l)}_{int(b)}"
+    outlc = f"outlcs_ci_{int(l)}_{int(b)}"
+
+    cmd = (
+        f"cat {lcdir}/{lc} | convexinv -s {inpdir}/{inp} {outdir}/{outlc} "
+        f"| minkowski | standardtri > {outdir}/{model}"
+        )
+    print(f"Execute\n  {cmd}")
+    subprocess.run(cmd, shell=True)
+
+
 def calc_JPLephem(asteroid, date0, date1, step, obscode, air=False):
     """
+
     Calculate asteroid ephemeris.
   
     Parameters
@@ -346,6 +403,7 @@ def calc_JPLephem(asteroid, date0, date1, step, obscode, air=False):
 
 def nobs_lc(lc):
     """
+
     Count the number of observations of a lightcurve.
 
     Parameter
@@ -366,8 +424,72 @@ def nobs_lc(lc):
         N_header = int(N_lc) + 1
         N_obs = N_all - N_header
         return N_obs
-    
 
 
+def tbinning(
+    df, tbin, key_t="jd", unit_t="d", key_flux="flux", key_fluxerr="fluxerr"):
+    """
 
+    Count the number of observations of a lightcurve.
+    The unit of time bin is always second!
+
+    Parameter
+    ---------
+    df : pandas.DataFrame
+        input dataframe
+    tbin : float
+        width of time bin in "second"
+    key_t : float
+        keyword for time
+    unit_t : str
+        day (d), hour (h), minumte (m), or second (s)
+    key_flux : str
+        keyword for flux
+    key_fluxerr : str
+        keyword for fluxerr
+
+    Return
+    ------
+    df : pandas.DataFrame
+        dataframe with binned data (t, flux, and fluxerr)
+    """
+
+    col = df.columns.tolist()
+    keys = [key_t, key_flux, key_fluxerr]
+    assert set(keys) <= set(col), "Check the input columns."
+
+    if unit_t == "s":
+        twidth = tbin
+    elif unit_t == "m":
+        twidth = tbin/60.
+    elif unit_t == "h":
+        twidth = tbin/3600.
+    elif unit_t == "d":
+        twidth = tbin/3600./24.
+ 
+    # Observation arc in arbitrary unit
+    arc = np.max(df[key_t]) - np.min(df[key_t])
+    # Time zero point
+    t0 = np.min(df[key_t])
+
+    # (maximum) number of data points after binning
+    N = np.int(np.ceil(arc/twidth))
+    print(f"twidth={twidth}, N={N}")
+    x, y, yerr = [], [], []
+    for n in range(N):
+        df_bin = df[(df[key_t] >= t0 + n*twidth) & (df[key_t] < t0 + (n+1)*twidth)]
+        N_bin = len(df_bin)
+        if N_bin == 0:
+            continue
+
+        # Average
+        # TODO weighted average
+        x.append(np.mean(df_bin[key_t]))
+        y.append(np.mean(df_bin[key_flux]))
+        yerr.append(adderr(df_bin[key_fluxerr])/N_bin)
+
+    df_bin = pd.DataFrame({key_t: x, key_flux: y, key_fluxerr: yerr})
+    print(f"(before binning) N_data={len(df)}, mean fluxerr={np.mean(df[key_fluxerr]):.2f}")
+    print(f"(after binning ) N_data={len(df_bin)}, mean fluxerr={np.mean(df_bin[key_fluxerr]):.2f}")
+    return df_bin
 
