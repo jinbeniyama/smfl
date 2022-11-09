@@ -9,11 +9,17 @@ import itertools
 from argparse import ArgumentParser as ap
 import numpy as np
 
-from smfl import do_conv
+from smfl import do_conv, do_conv_final
 
 
 if __name__ == "__main__":
     parser = ap(description="Do convexinversion.")
+    parser.add_argument(
+        "--lam", type=float, default=None, 
+        help="ecliptic longitude")
+    parser.add_argument(
+        "--beta", type=float, default=None, 
+        help="ecliptic latitude")
     parser.add_argument(
         "--Nlam", type=int, default=1, 
         help="number of ecliptic longitude")
@@ -35,13 +41,29 @@ if __name__ == "__main__":
     parser.add_argument(
         "--resdir", type=str, default="convex_result",
         help="Directory for results of convexinv")
+    parser.add_argument(
+        "--findir", type=str, default="convex_final",
+        help="Directory for results of convexinv")
+    parser.add_argument(
+        "--final", action="store_true", default=False, 
+        help="Create final model with fixed period and pole")
     args = parser.parse_args()
  
     resdir = args.resdir
+    findir = args.findir
     os.makedirs(resdir, exist_ok=True)
+    os.makedirs(findir, exist_ok=True)
     inpdir = args.inpdir
-    lcdir = args.lcdir
 
+    lcdir = args.lcdir
+    lc = args.lc
+
+ 
+    # Fixed period and pole
+    if args.final:
+        do_conv_final(args.lam, args.beta, lc, lcdir, inpdir=inpdir, outdir=findir)
+
+     
     # Starting time 
     t0 = time.time()
 
@@ -52,7 +74,6 @@ if __name__ == "__main__":
     # Use all *lcs in lcdir
     #lc = f"{lcdir}/*lcs"
     #assert False, "Check the code for multiple lcs."
-    lc = args.lc
 
     # Create combinations
     params = [(l, b, lc, lcdir, inpdir, resdir) 
