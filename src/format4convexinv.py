@@ -26,9 +26,10 @@ Test: Conpare the output "ariadne_test", "test_lcs_rel" in DAMIT script,
 """
 import sys
 import numpy as np
+import pandas as pd
 from argparse import ArgumentParser as ap
 
-from smfl import format4inv, Ariadnetestdata, save4inv, calc_JPLephem
+from smfl import format4inv, Ariadnetestdata, save4inv, calc_JPLephem, tbinning
 
 
 if __name__ == "__main__":
@@ -54,6 +55,12 @@ if __name__ == "__main__":
     parser.add_argument(
         "--key_fluxerr", default="fluxerr", 
         help="Keyword of flux uncertainty")
+    parser.add_argument(
+        "--tbin", type=float, default=None, 
+        help="width of time bin")
+    parser.add_argument(
+        "--unit_t", default="s", 
+        help="Unit of time for binning")
     parser.add_argument(
         "--out", default="out_lcs", 
         help="output filename")
@@ -82,7 +89,7 @@ if __name__ == "__main__":
         # Leiden Station, Johannesburg (observatory) [code: 081]3 
         # Reference : vanHouten-Groeneveld et al. 1979
         jpl_Ariadne = "Ariadnetest_jpl.csv"
-      
+
         df_phot = format4inv(csv_Ariadne, jpl_Ariadne, args.key_jd)
         out = f"test_Ariadne"
         save4inv(
@@ -95,7 +102,14 @@ if __name__ == "__main__":
     result = []
     # Extract object info
     for csv,jpl in zip(args.res, args.jpl):
-        df_phot = format4inv(csv, jpl, args.key_jd)
+        df_phot = pd.read_csv(csv, sep=" ")
+        # Binning with time
+        if args.tbin:
+            df_phot = tbinning(
+                df_phot, args.tbin, key_t=args.key_jd, unit_t="d", 
+                key_flux=args.key_flux, key_fluxerr=args.key_fluxerr)
+      
+        df_phot = format4inv(df_phot, jpl, args.key_jd)
         result.append(df_phot)
   
     # Set seed 
