@@ -40,35 +40,41 @@ import numpy as np
 if __name__ == "__main__":
     parser = ap(description="Create input of convexinv with arbitary settings")
     parser.add_argument(
-      "--sidP", type=float, default=0, 
-      help="sidereal period in hour")
+        "--sidP", type=float, default=0, 
+        help="sidereal period in hour")
     parser.add_argument(
-      "--Nlam", type=int, default=1, 
-      help="number of ecliptic longitude")
+        "--lam", type=float, default=None, 
+        help="ecliptic longitude")
     parser.add_argument(
-      "--Nbeta", type=int, default=1, 
-      help="number of ecliptic latitude")
+        "--beta", type=float, default=None, 
+        help="ecliptic latitude")
     parser.add_argument(
-      "-a", type=int, default=0.5, 
-      help="phase funct. param a (amplitude)")
+        "--Nlam", type=int, default=1, 
+        help="number of ecliptic longitude")
     parser.add_argument(
-      "-d", type=int, default=0.1, 
-      help="phase funct. param d (width)")
+        "--Nbeta", type=int, default=1, 
+        help="number of ecliptic latitude")
     parser.add_argument(
-      "-k", type=int, default=-0.5, 
-      help="phase funct. param k (slope)")
+        "-a", type=int, default=0.5, 
+        help="phase funct. param a (amplitude)")
     parser.add_argument(
-      "-c", type=int, default=0.1, 
-      help="Lambert coefficient c")
+        "-d", type=int, default=0.1, 
+        help="phase funct. param d (width)")
     parser.add_argument(
-      "--Niter", type=int, default=50, 
-      help="number of iterations")
+        "-k", type=int, default=-0.5, 
+        help="phase funct. param k (slope)")
     parser.add_argument(
-      "--fixP", action="store_true", default=False, 
-      help="Fix sidereal period")
+        "-c", type=int, default=0.1, 
+        help="Lambert coefficient c")
     parser.add_argument(
-      "--fixpole", action="store_true", default=False, 
-      help="Fix orientations")
+        "--Niter", type=int, default=50, 
+        help="number of iterations")
+    parser.add_argument(
+        "--fixP", action="store_true", default=False, 
+        help="Fix sidereal period")
+    parser.add_argument(
+        "--fixpole", action="store_true", default=False, 
+        help="Fix orientations")
     parser.add_argument(
         "--inpdir", type=str, default="convex_input",
         help="Directory for input file of convexinv")
@@ -78,9 +84,13 @@ if __name__ == "__main__":
     os.makedirs(outdir, exist_ok=True)
 
     Niter = args.Niter
-  
-    lam = np.linspace(0, 360, args.Nlam)
-    beta = np.linspace(-90, 90, args.Nbeta)
+    
+    if args.lam:
+        lam = [args.lam]
+        beta = [args.beta]
+    else:
+        lam = np.linspace(0, 360, args.Nlam)
+        beta = np.linspace(-90, 90, args.Nbeta)
     
     # siderial period in hour
     if args.sidP == 0:
