@@ -11,7 +11,6 @@ After procedures 1 to 8, shape model can be created with an arbitrary software.
 This repository optimizes the public code in [DAMIT](https://astro.troja.mff.cuni.cz/projects/damit/).
 
 
-
 ## Procedures
 1. Format lightcurves with aspect data from JPL ephemerides.
 ```
@@ -61,25 +60,29 @@ do_convexinv.py --Nlam (number of longitude) --Nbeta (number of latitude)
 6. Plot pole solution with chi2.
 Image is saved in the current directory.
 ```
-plot_polesolution.py --Nlam (number of longitude) --Nbeta (number of latitude) --norm
+plot_polesolution.py --Nlam (number of longitude) --Nbeta (number of latitude)
 ```
 
-7. Convert model to stl.
+7. Create model with fixed period and pole
 ```
-[in prep.]
-model2stl.py (model)
+make_convexinv_input.py --sidP  (rotation period) --lam (longitude) --beta (latitude) —fixpole
 ```
 
-
-8. Plot lightcurves with model curves.
+8. Convert model to stl.
 ```
-[in prep.]
-plot_lcs_with_model.py
+[model, output of the process 7.]
+model2stl.py model_ci_150_0
+```
+
+9. Plot lightcurves with model curves.
+```
+plot_lcs_with_model.py (preprocessed lightcurve) --rotP (rotation period) 
+--lc_model  (model curve, output of the process 8.)
 ```
 
 ## Installing
 Please install by pip, otherwise open paths to src and smlf directories by yourself.
-## Usage
+
 
 ## Acknowledgments
 I would like to express the gratitude to the people involved in [DAMIT](https://astro.troja.mff.cuni.cz/projects/damit/).
