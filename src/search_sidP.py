@@ -29,6 +29,10 @@ if __name__ == "__main__":
         out = f"{args.inp.split('/')[-1]}_out"
 
     for idx,lc in enumerate(args.lc):
-        cmd = f"cat {lc} | period_scan -v {args.inp} {out}_{idx+1:04d}"
+        if len(lc)==1:
+           output = out
+        else:
+           output = f"{out}_{idx+1:04d}"
+        cmd = f"cat {lc} | period_scan -v {args.inp} {output}"
         print(f"{idx+1:04d} : {cmd}")
         subprocess.run(cmd, shell=True)
