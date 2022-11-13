@@ -4,7 +4,7 @@
 [Document in Japanese](http://www.ioa.s.u-tokyo.ac.jp/~beniyama/pdf/DAMIT_JB.pdf)
 
 ## Overview
-Do shape modeling of minor bodied from lightcurves.
+Do shape modeling of minor bodies from lightcurves.
 All what needed in this script is a text file with 
 `time (jd)` and `flux` (and `fluxerr`).
 After procedures 1 to 8, shape model can be created with an arbitrary software.
@@ -76,9 +76,16 @@ model2stl.py model_ci_150_0
 
 9. Plot lightcurves with model curves.
 ```
-plot_lcs_with_model.py (preprocessed lightcurve) --rotP (rotation period) 
+plot_lcs_with_model.py (object name) (preprocessed lightcurve) --rotP (rotation period) 
 --lc_model  (model curve, output of the process 8.)
 ```
+
+## Others
+- Plot phase curves used in DAMIT.
+```
+plot_phasecurve_damit.py
+```
+
 
 ## Installing
 Please install by pip, otherwise open paths to src and smlf directories by yourself.
