@@ -41,6 +41,7 @@ if __name__ == "__main__":
     JD0 = args.JD0
 
 
+
     # Read photometric result =================================================
     jd_phot, flux_phot, n_lc = [], [], []
     # Index of the number of lightcurve
@@ -73,6 +74,9 @@ if __name__ == "__main__":
             lc_model = [float(x.replace("\n", "")) for x in lines]
             assert len(df) == len(lc_model), "Check the input files."
             df["flux_model"] = lc_model
+        str_model = "_wmodel"
+    else:
+        str_model = ""
     # Read model curves (optional ) ===========================================
 
    
@@ -117,8 +121,8 @@ if __name__ == "__main__":
     ax2_2.set_ylabel("Relative flux")
 
 
-    out = f"{args.obj}_lc.png"
-    plt.savefig(out)
+    out = f"{args.obj}_lc{str_model}.png"
+    plt.savefig(out, dpi=200)
     plt.close()
     # Plot lightcurves ========================================================
      
@@ -168,7 +172,7 @@ if __name__ == "__main__":
         ax2_2.set_ylabel("Relative flux")
 
         # Plot lightcurves
-        out = f"{args.obj}_lc_phased.png"
-        plt.savefig(out)
+        out = f"{args.obj}_lc_phased{str_model}.png"
+        plt.savefig(out, dpi=200)
         plt.close()
     # Plot phased lightcurves =================================================

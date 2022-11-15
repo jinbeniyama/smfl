@@ -71,13 +71,18 @@ make_convexinv_input.py --sidP  (rotation period) --lam (longitude) --beta (lati
 8. Convert model to stl.
 ```
 [model, output of the process 7.]
-model2stl.py model_ci_150_0
+model2stl.py (model)
 ```
 
 9. Plot lightcurves with model curves.
 ```
 plot_lcs_with_model.py (object name) (preprocessed lightcurve) --rotP (rotation period) 
 --lc_model  (model curve, output of the process 8.)
+```
+
+10. Derive axial ratios.
+```
+plot_ellipsoid.py (model) (object name)
 ```
 
 ## Others

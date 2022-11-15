@@ -17,13 +17,14 @@ if __name__ == "__main__":
     parser = ap(description="Plot the phase function in DAMIT.")
     args = parser.parse_args()
  
-
     fig = plt.figure(figsize=(8, 6))
 
     ax = fig.add_axes([0.15, 0.15, 0.75, 0.75])
     ax.set_xlabel("Phase angle [deg]")
     ax.set_ylabel("Relative brightness")
     
+
+    # Different from phase curve in magnitude
     # Default values
     #   A0, D, k = 0.5, 0.1, -0.5 (DAMIT document, convexinv_doc.pdf)
     A0_list = [0.5]
