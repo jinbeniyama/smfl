@@ -10,16 +10,23 @@ import datetime
 from calcerror import round_error
 from smfl import plotstyle
 
+# TODO: Add confidence level
+# TODO: Why period scan results are not ordered by rotP?
+
+
 if __name__ == "__main__":
     parser = ap(description="Plot period vs. chi2.")
     parser.add_argument(
-      "obj", type=str, help="object name")
+        "obj", type=str, help="object name")
     parser.add_argument(
-      "out_period_scan", nargs="*", 
-      help="output file of period_scan")
+        "out_period_scan", nargs="*", 
+        help="output file of period_scan")
     parser.add_argument(
-      "--outtype", type=str, default="png",
-      help="format of output figures")
+        "--sec", action="store_true", default=False,
+        help="Handle period in sec")
+    parser.add_argument(
+        "--outtype", type=str, default="png",
+        help="format of output figures")
     args = parser.parse_args()
     
     # Number of trials with Monte Carlo technique
@@ -29,7 +36,10 @@ if __name__ == "__main__":
     fig = plt.figure()
     ax = fig.add_axes([0.2, 0.15, 0.75, 0.65])
     ax_p_hist = fig.add_axes([0.2, 0.80, 0.750, 0.1])
-    ax.set_xlabel("Sidereal period [h]")
+    if args.sec:
+        ax.set_xlabel("Sidereal period [s]")
+    else:
+        ax.set_xlabel("Sidereal period [h]")
     if N_mc == 0:
         ylabel = "$\chi^2$"
     else:
@@ -48,27 +58,44 @@ if __name__ == "__main__":
                 # Remove ""
                 line = [float(x) for x in line if x != ""]
                 assert len(line)==5, "Check the input."
+                if args.sec:
+                    line[0] = line[0]*3600.
                 p_list.append(line[0])
                 rms_list.append(line[1])
                 chi2_list.append(line[2])
                 iter_list.append(line[3])
                 dark_list.append(line[4])
-  
+        
+        # Order by rotP
+        zip_lists = zip(p_list, chi2_list)
+        zip_sort = sorted(zip_lists)
+        p_list, chi2_list = zip(*zip_sort)
+
         col, mark = plotstyle(n)
         print(f"  col, mark = {col}, {mark}")
         # Shift to match the first result
         if n!=0:
             offset = min0 - np.min(chi2_list)
         chi2_list = [x+offset for x in chi2_list]
-        ax.scatter(p_list, chi2_list, s=7, color=col, marker=mark)
+        #ax.scatter(p_list, chi2_list, s=7, color=col, marker=mark)
+        ax.plot(p_list, chi2_list, lw=1, color=col)
+        
         
         # Save the minimum value of the first try
-        if n==0:
+        if n == 0:
             min0 = np.min(chi2_list)
   
         # Save period
         idx_min = chi2_list.index(min(chi2_list))
         p_best_list.append(p_list[idx_min])
+
+    # If N_mc > 1, plot the number of trials
+    if N_mc > 1:
+        xmin, xmax = ax.get_xlim()
+        ymin, ymax = ax.get_ylim()
+        x = xmin + (xmax-xmin)*0.1
+        y = ymin + (ymax-ymin)*0.1
+        ax.text(x, y, f"N={N_mc}")
   
   
     # Plot histograms
@@ -76,7 +103,10 @@ if __name__ == "__main__":
     print(f"p_mean, p_std = {p_mean}, {p_std}")
     p_mean_str, p_std_str = round_error(p_mean, p_std)
     print(f"p_mean, p_std = {p_mean_str}, {p_std_str}")
-    label = f"P=${p_mean_str}\pm{p_std_str} h$"
+    if args.sec:
+        label = f"P=${p_mean_str}\pm{p_std_str} s$"
+    else:
+        label = f"P=${p_mean_str}\pm{p_std_str} h$"
     ax_p_hist.hist(
       p_best_list, color="black", label=label)
     ax_p_ymax = ax_p_hist.get_ylim()[1]
