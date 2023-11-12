@@ -30,7 +30,10 @@ if __name__ == "__main__":
     A0_list = [0.5]
     D_list = [0.1]
     k_list = [-0.5]
-    alpha = np.arange(0, 50, 0.1)
+    alpha_deg = np.arange(0, 50, 0.1)
+    # Radian
+    alpha = [np.radians(x) for x in alpha_deg] 
+    alpha = np.array(alpha)
 
     for idx, (A0,D,k) in enumerate(zip(A0_list, D_list, k_list)):
         f = A0*np.exp(-alpha/D) + k*alpha + 1
@@ -38,7 +41,7 @@ if __name__ == "__main__":
             label = f"DAMIT Default (A0, D, k) = ({A0}, {D}, {k})"
         else:
             label = f"(A0, D, k) = ({A0}, {D}, {k})"
-        ax.plot(alpha, f, label=label)
+        ax.plot(alpha_deg, f, label=label)
         ax.legend()
 
     out = f"phasefunc_in_damit.png"
