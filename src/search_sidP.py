@@ -27,12 +27,22 @@ if __name__ == "__main__":
     else:
         # Save in current directory
         out = f"{args.inp.split('/')[-1]}_out"
-
+    
     for idx,lc in enumerate(args.lc):
         if len(lc)==1:
            output = out
         else:
            output = f"{out}_{idx+1:04d}"
-        cmd = f"cat {lc} | period_scan -v {args.inp} {output}"
-        print(f"{idx+1:04d} : {cmd}")
-        subprocess.run(cmd, shell=True)
+
+        # Old style. It does not work due to the update of Mac? Python?
+        #cmd = f"cat {lc} | period_scan -v {args.inp} {output}"
+        #print(f"{idx+1:04d} : {cmd}")
+        #subprocess.run(cmd, shell=True)
+
+        print(f"{idx+1:04d}")
+        with open(lc, 'r') as f:
+            print(args.inp)
+            pro = subprocess.Popen(
+                ['period_scan', '-v', f"{args.inp}", f"{output}"], 
+                stdin=f, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            stdout, stderr = pro.communicate()
