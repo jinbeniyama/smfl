@@ -100,7 +100,6 @@ if __name__ == "__main__":
 
     lam = np.linspace(0, 360, Nlam)
     beta = np.linspace(-90, 90, Nbeta)
-
     # Make grid
     xx, yy = np.meshgrid(lam, beta)
     data = np.c_[xx.ravel(), yy.ravel()]
@@ -150,6 +149,14 @@ if __name__ == "__main__":
             dfac_list.append(float(dfac))
 
 
+
+    lam = np.linspace(-180, 180, Nlam)
+    beta = np.linspace(-90, 90, Nbeta)
+    # Make grid
+    xx, yy = np.meshgrid(lam, beta)
+    data = np.c_[xx.ravel(), yy.ravel()]
+
+
     chi2_min = np.min(chi2_list)
     if norm:
         Z_chi2 = [x/chi2_min for x in chi2_list]
@@ -171,14 +178,14 @@ if __name__ == "__main__":
     Z_dfac = Z_dfac.reshape(xx.shape)
 
     fig = plt.figure(figsize=(8, 14))
-
-    ax1 = fig.add_axes([0.15, 0.72, 0.63, 0.25])
+    
+    ax1 = fig.add_axes([0.15, 0.72, 0.63, 0.25], projection="mollweide")
     cax1 = fig.add_axes([0.80, 0.72, 0.03, 0.25])
 
-    ax2 = fig.add_axes([0.15, 0.40, 0.63, 0.25])
+    ax2 = fig.add_axes([0.15, 0.40, 0.63, 0.25], projection="mollweide")
     cax2 = fig.add_axes([0.80, 0.40, 0.03, 0.25])
 
-    ax3 = fig.add_axes([0.15, 0.08, 0.63, 0.25])
+    ax3 = fig.add_axes([0.15, 0.08, 0.63, 0.25], projection="mollweide")
     cax3 = fig.add_axes([0.80, 0.08, 0.03, 0.25])
 
     y_formatter = matplotlib.ticker.ScalarFormatter(useOffset=False)
@@ -210,7 +217,9 @@ if __name__ == "__main__":
     print(f"  -> chi2: {chi2_min:.2f} to {chi2_min*(1 + CI):.2f}")
     # Add CI line
     levels = [chi2_min*(1 + CI)]
-    ax1.contour(xx, yy, Z_chi2, levels, linestyles=["dashed"], colors="white")
+    ax1.contour(
+        xx, yy, Z_chi2, levels, linestyles=["dashed"], colors="white")
+        #xx, yy, Z_chi2, linestyles=["dashed"], colors="white")
 
     im = ax2.contourf(xx, yy, Z_rotP, zorder=-1, cmap=cm)
     cbar = fig.colorbar(
