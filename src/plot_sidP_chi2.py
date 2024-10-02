@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """Plot sidereal period vs. chi square.
 """
+import os
 from argparse import ArgumentParser as ap
 import numpy as np
 import matplotlib.pyplot as plt  
@@ -25,25 +26,34 @@ if __name__ == "__main__":
         "--sec", action="store_true", default=False,
         help="Handle period in sec")
     parser.add_argument(
+        "--outdir", type=str, default=".",
+        help="Output firectory")
+    parser.add_argument(
         "--outtype", type=str, default="png",
         help="format of output figures")
     args = parser.parse_args()
     
+    outdir = args.outdir
+    os.makedirs(outdir, exist_ok=True)
+
     # Number of trials with Monte Carlo technique
     N_mc = len(args.out_period_scan)
+
+    # Object name for filename
+    obj_filename = args.obj.replace(" ", "")
   
   
-    fig = plt.figure()
-    ax = fig.add_axes([0.2, 0.15, 0.75, 0.65])
-    ax_p_hist = fig.add_axes([0.2, 0.80, 0.750, 0.1])
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_axes([0.15, 0.15, 0.8, 0.80-0.05])
+    # Margin for object name in title
     if args.sec:
         ax.set_xlabel("Sidereal period [s]")
     else:
         ax.set_xlabel("Sidereal period [h]")
     if N_mc == 0:
-        ylabel = "$\chi^2$"
+        ylabel = "$Reduced \chi^2$"
     else:
-        ylabel = "$\chi^2$ (shifted)"
+        ylabel = "Reduced $\chi^2$ (+offset)"
     ax.set_ylabel(ylabel)
   
     offset = 0
@@ -71,14 +81,15 @@ if __name__ == "__main__":
         zip_sort = sorted(zip_lists)
         p_list, chi2_list = zip(*zip_sort)
 
-        col, mark = plotstyle(n)
-        print(f"  col, mark = {col}, {mark}")
+        col, _ = plotstyle(n)
         # Shift to match the first result
         if n!=0:
             offset = min0 - np.min(chi2_list)
         chi2_list = [x+offset for x in chi2_list]
-        #ax.scatter(p_list, chi2_list, s=7, color=col, marker=mark)
-        ax.plot(p_list, chi2_list, lw=1, color=col)
+        if N_mc == 1:
+            ax.scatter(p_list, chi2_list, s=30, color=col, marker="x")
+        else:
+            ax.plot(p_list, chi2_list, lw=1, color=col)
         
         
         # Save the minimum value of the first try
@@ -89,13 +100,6 @@ if __name__ == "__main__":
         idx_min = chi2_list.index(min(chi2_list))
         p_best_list.append(p_list[idx_min])
 
-    # If N_mc > 1, plot the number of trials
-    if N_mc > 1:
-        xmin, xmax = ax.get_xlim()
-        ymin, ymax = ax.get_ylim()
-        x = xmin + (xmax-xmin)*0.1
-        y = ymin + (ymax-ymin)*0.1
-        ax.text(x, y, f"N={N_mc}")
   
   
     # Plot histograms
@@ -104,22 +108,26 @@ if __name__ == "__main__":
     p_mean_str, p_std_str = round_error(p_mean, p_std)
     print(f"p_mean, p_std = {p_mean_str}, {p_std_str}")
     if args.sec:
-        label = f"P=${p_mean_str}\pm{p_std_str} s$"
+        Ppart = f"P=${p_mean_str}\pm{p_std_str} s$"
     else:
-        label = f"P=${p_mean_str}\pm{p_std_str} h$"
-    ax_p_hist.hist(
-      p_best_list, color="black", label=label)
-    ax_p_ymax = ax_p_hist.get_ylim()[1]
-    ax_p_hist.vlines(p_mean, 0, ax_p_ymax, color="black", ls="solid")
-    ax_p_hist.vlines(p_mean-p_std, 0, ax_p_ymax, color="black", ls="dashed")
-    ax_p_hist.vlines(p_mean+p_std, 0, ax_p_ymax, color="black", ls="dashed")
-    ax_p_hist.axes.xaxis.set_visible(False)
-    pmin, pmax = ax.get_xlim()
-    ax_p_hist.set_xlim([pmin, pmax])
+        Ppart = f"P=${p_mean_str}\pm{p_std_str} h$"
+
+    # If N_mc > 1, plot the number of trials and period with uncertainty
+    if N_mc > 1:
+        xmin, xmax = ax.get_xlim()
+        ymin, ymax = ax.get_ylim()
+        x = xmin + (xmax-xmin)*0.05
+        y = ymin + (ymax-ymin)*0.1
+        ax.text(x, y, f"N={N_mc}\n{Ppart}", fontsize=25)
   
+    ymin, ymax = ax.get_ylim()
+    ax.vlines(p_mean, ymin, ymax, color="black", ls="solid")
+    ax.vlines(p_mean-p_std, ymin, ymax, color="black", ls="dashed")
+    ax.vlines(p_mean+p_std, ymin, ymax, color="black", ls="dashed")
+    ax.set_ylim([ymin, ymax])
+    
     ax.set_title(f"{args.obj}")
-    ax.legend()
-    ax_p_hist.legend()
-    out = f"{args.obj}_sidP_chi2_N{N_mc}.{args.outtype}"
+    out = f"{obj_filename}_sidP_chi2_N{N_mc}.{args.outtype}"
+    out = os.path.join(outdir, out)
     plt.savefig(out)
     plt.close()
