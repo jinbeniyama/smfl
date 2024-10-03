@@ -34,6 +34,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--JD0", default=2459702.5, type=float,
         help="time zero point in Juliand day (default is 2022-05-03)")
+    parser.add_argument(
+        "--ylim", type=float, nargs=2, default=False,
+        help="Y min and max")
     args = parser.parse_args()
 
     
@@ -109,13 +112,16 @@ if __name__ == "__main__":
             color=mycolor[1], label=f"LC {idx+1} obs")
 
         if args.lc_model:
-            ax.plot(
-                df_temp["jd"]-JD0, df_temp["flux_model"], 
+            ax.scatter(
+                df_temp["jd"]-JD0, df_temp["flux_model"], marker="x",
                 color=mycolor[0], label=f"LC {idx+1} model")
-
-        # Ignore outliers
-        ax.set_ylim([0.5, 1.5])
         ax.legend()
+
+    # Use the same range
+    if args.ylim:
+        ymin, ymax = args.ylim
+        for ax in fig.axes:
+            ax.set_ylim([ymin, ymax])
 
     ax2_2.set_xlabel("Rotational Phase")
     ax2_2.set_ylabel("Relative flux")
@@ -160,19 +166,24 @@ if __name__ == "__main__":
                 color=mycolor[1], label=f"LC {idx+1}")
 
             if args.lc_model:
-                ax.plot(
-                    df_temp["phase"], df_temp["flux_model"], 
+                ax.scatter(
+                    df_temp["phase"], df_temp["flux_model"], marker="x",
                     color=mycolor[0], label=f"LC {idx+1} model")
             ax.set_xlim([0.0, 1.0])
             # Ignore outliers
-            ax.set_ylim([0.5, 1.5])
+            #ax.set_ylim([0.5, 1.5])
             ax.legend()
 
         ax2_2.set_xlabel("Rotational Phase")
         ax2_2.set_ylabel("Relative flux")
+        # Use the same range
+        if args.ylim:
+            ymin, ymax = args.ylim
+            for ax in fig.axes:
+                ax.set_ylim([ymin, ymax])
 
         # Plot lightcurves
-        out = f"{args.obj}_lc_phased{str_model}.png"
+        out = f"{args.obj}_plc{str_model}.png"
         plt.savefig(out, dpi=200)
         plt.close()
     # Plot phased lightcurves =================================================
