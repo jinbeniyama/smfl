@@ -78,6 +78,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--inpdir", type=str, default="convex_input",
         help="Directory for input file of convexinv")
+    parser.add_argument(
+        "--out", type=str, default=False,
+        help="Output file name")
     args = parser.parse_args()
    
     outdir = args.inpdir
@@ -115,7 +118,11 @@ if __name__ == "__main__":
     
     for l in lam:
         for b in beta:
-            out = f"input_ci_{int(l)}_{int(b)}"
+            # This is for N(lam)==N(beta)==1
+            if args.out:
+                out = args.out
+            else:
+                out = f"input_ci_{int(l)}_{int(b)}"
             out = os.path.join(outdir, out)
             with open(out, "w") as f:
                 f.write(f"{l} {fix_lambda}\n")
