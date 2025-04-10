@@ -7,9 +7,55 @@ import os
 from argparse import ArgumentParser as ap
 import numpy as np
 import matplotlib.pyplot as plt  
+from astroquery.jplhorizons import Horizons
 
-from smfl import calc_obliq
 
+def calc_obliq(lam, beta, incl, LoA):
+    """
+    Calculate obliquity from ecliptic coordinates.
+
+    Parameter
+    ---------
+    lam, beta : float
+        ecliptic coordinates of poles in deg
+    incl : float
+        orbital inclination in deg
+    LoA : float
+        longitude of ascending node in deg
+
+    Return
+    ------
+    obliq : float
+        obliquity in deg
+    """
+
+    # Orbital elements
+    sin_i = np.sin(np.deg2rad(incl))
+    cos_i = np.cos(np.deg2rad(incl))
+    sin_Omega = np.sin(np.deg2rad(LoA))
+    cos_Omega = np.cos(np.deg2rad(LoA))
+
+    # Orbit pole vector
+    x_orb = sin_i*sin_Omega
+    y_orb = -cos_Omega*sin_i
+    z_orb = cos_i
+
+    # Ecliptic coordinates
+    sin_lambda = np.sin(np.deg2rad(lam))
+    cos_lambda = np.cos(np.deg2rad(lam))
+    sin_beta = np.sin(np.deg2rad(beta))
+    cos_beta = np.cos(np.deg2rad(beta))
+
+    # Asteroid spin pole vector
+    x_spin = cos_beta*cos_lambda
+    y_spin = cos_beta*sin_lambda
+    z_spin = sin_beta
+
+    # Inner product equals cos(obliq)
+    cos_obliq = x_spin*x_orb + y_spin*y_orb + z_spin*z_orb
+    # In degree
+    obliq = np.rad2deg(np.arccos(cos_obliq))
+    return obliq
 
 
 if __name__ == "__main__":
@@ -42,7 +88,7 @@ if __name__ == "__main__":
     data = np.c_[xx.ravel(), yy.ravel()]
 
     # Obtain inclination and LoA to calculate obliquity
-    ast = Horizons(id=obj, location="500@10", epochs=epoch)
+    ast = Horizons(id=args.obj, location="500@10", epochs=2450951.5)
     el = ast.elements()
     incl = el["incl"][0]
     LoA = el["Omega"][0]
@@ -51,7 +97,7 @@ if __name__ == "__main__":
     for x in data:
         l, b = x[0], x[1]
         # Calculate obliquity
-        obliq = calc_obliq(l, b, args.incl, args.LoA)
+        obliq = calc_obliq(l, b, incl, LoA)
         obliq_list.append(obliq)
 
     lam = np.linspace(-180, 180, Nlam)
