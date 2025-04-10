@@ -1,30 +1,22 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Plot obliquity.
-
-TODO:
-    Query incl. and LoA with object name.
 """
 import os 
 from argparse import ArgumentParser as ap
 import numpy as np
 import matplotlib.pyplot as plt  
-import matplotlib
 
 from smfl import calc_obliq
-
 
 
 
 if __name__ == "__main__":
     parser = ap(description="Plot obliquity map.")
     parser.add_argument(
-        "incl", type=float, default=10, 
-        help="Orbital inclination in deg")
-    parser.add_argument(
-        "LoA", type=float, default=10, 
-        help="Longitude of ascending node in deg")
+        "obj", type=str,  
+        help="Object name")
     parser.add_argument(
         "--lam", type=float, default=10, 
         help="pole longitude in deg")
@@ -48,6 +40,12 @@ if __name__ == "__main__":
     # Make grid
     xx, yy = np.meshgrid(lam, beta)
     data = np.c_[xx.ravel(), yy.ravel()]
+
+    # Obtain inclination and LoA to calculate obliquity
+    ast = Horizons(id=obj, location="500@10", epochs=epoch)
+    el = ast.elements()
+    incl = el["incl"][0]
+    LoA = el["Omega"][0]
 
     obliq_list = []
     for x in data:
