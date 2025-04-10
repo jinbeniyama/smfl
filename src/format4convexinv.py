@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Format lightcurves for convexinv.
@@ -11,6 +11,7 @@ Arbitrary keywords can be used with key_jd, key_flux, and key_fluxerr options.
 Before execute this script, query JPL/HORIZONS and obtain quantities below.
   'Date__(UT)__HR:HM', 'R.A._____(ICRF)_____DEC', 'R.A.__(a-apparent)__DEC',
   'hEcl-Lon', 'hEcl-Lat', 'r', 'rdot', 'delta', 'deldot'
+  (1, 2, 18, 19, and 20 on the JPL Horizons website)
 
 Read a documentation in DAMIT website about the format of output.
 
