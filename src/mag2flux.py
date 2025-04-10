@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Convert magnitude to intensity for convexinv.
@@ -46,10 +46,9 @@ if __name__ == "__main__":
     
     # Set mean mag to 0
     df[key_mag] = df[key_mag] - np.mean(df[key_mag])
-   
+    # F    = 10**(-0.4*mag)
+    # Ferr = 0.4*log_e(10)*F*magerr
     df["flux_cor"] = 10**(-0.4*df[key_mag])
-    # TODO calculate flux error
-    df["fluxerr_cor"] = 0
-    
+    df["fluxerr_cor"] = 0.4*np.log(10)*df["flux_cor"]*df[key_magerr]
 
     df.to_csv(args.out, sep=" ")
