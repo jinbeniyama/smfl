@@ -26,16 +26,10 @@ if __name__ == "__main__":
         "--sec", action="store_true", default=False,
         help="Handle period in sec")
     parser.add_argument(
-        "--outdir", type=str, default=".",
-        help="Output firectory")
-    parser.add_argument(
-        "--outtype", type=str, default="png",
-        help="format of output figures")
+        "--out", type=str, default="ps_result.png",
+        help="Output file name")
     args = parser.parse_args()
     
-    outdir = args.outdir
-    os.makedirs(outdir, exist_ok=True)
-
     # Number of trials with Monte Carlo technique
     N_mc = len(args.out_period_scan)
 
@@ -127,7 +121,5 @@ if __name__ == "__main__":
     ax.set_ylim([ymin, ymax])
     
     ax.set_title(f"{args.obj}")
-    out = f"{obj_filename}_sidP_chi2_N{N_mc}.{args.outtype}"
-    out = os.path.join(outdir, out)
-    plt.savefig(out)
+    plt.savefig(args.out)
     plt.close()
