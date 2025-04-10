@@ -40,6 +40,9 @@ if __name__ == "__main__":
         "--P1_hr", type=float, default=0, 
         help="Minimum period in hour")
     parser.add_argument(
+        "--dt_hr", type=float, default=24., 
+        help="Observation arc in hour")
+    parser.add_argument(
         "--interval", type=float, default=0.8, 
         help="Interval coefficient")
     parser.add_argument(
@@ -58,6 +61,9 @@ if __name__ == "__main__":
     eps = args.interval
     N = args.deg_harmonics
     M = args.ord_harmonics
+
+    N_per = 2*args.dt_hr*(P1-P0)/P0/P1/eps
+    print(f"Number of periods: N_per = {N_per:.1f}")
     
     with open(args.out, "w") as f:
         f.write(f"{P0} {P1} {eps} \n")
