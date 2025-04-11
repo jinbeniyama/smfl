@@ -49,7 +49,7 @@ def calc_confidence_chi2(p_list, chi2_list, dof):
     # this boundary corresponds to those of Polishook 2014, Icarus, 241, 79 
     # and Cambioni+2021, Nature.       
     chi2_min_norm = np.min(chi2_norm_list)
-    chi2_3sigma = chi2_min_norm + 3*(2/nu)**0.5
+    chi2_3sigma = chi2_min_norm + 3*(2/dof)**0.5
 
     # Search periods with chi2 values smaller than chi2_3sigma
     P_cand, chi2_cand = [], []
@@ -60,7 +60,7 @@ def calc_confidence_chi2(p_list, chi2_list, dof):
     return P_cand, chi2_cand, chi2_3sigma
 
 
-def plot_chi2_rotP(out_period_scan, obj, Psec=False, out="chi2_rotP.jpg"):
+def plot_chi2_rotP(out_period_scan, obj, dof, Psec=False, out="chi2_rotP.jpg"):
     """Plot chi2 vs. rotP.
 
     Parameters
@@ -69,6 +69,8 @@ def plot_chi2_rotP(out_period_scan, obj, Psec=False, out="chi2_rotP.jpg"):
         output of period_scan (N=1)
     obj : str
         object name
+    dof : int
+        degrees of freedom
     Psec : bool, optional
         whether the unit of rotation period is second
     out : str, bool 
@@ -234,7 +236,11 @@ def plot_chi2_rotP_MC(out_period_scan, obj, Psec=False, out="chi2_rotP_MC.jpg"):
 if __name__ == "__main__":
     parser = ap(description="Plot period vs. chi2.")
     parser.add_argument(
-        "obj", type=str, help="object name")
+        "obj", type=str, 
+        help="object name")
+    parser.add_argument(
+        "dof", type=int, 
+        help="Degree of freedom")
     parser.add_argument(
         "out_period_scan", nargs="*", 
         help="output file of period_scan")
@@ -252,4 +258,4 @@ if __name__ == "__main__":
     if N_mc > 1:
         plot_chi2_rotP_MC(args.out_period_scan, args.obj, args.sec, out=args.out)
     else:
-        plot_chi2_rotP(args.out_period_scan, args.obj, args.sec, out=args.out)
+        plot_chi2_rotP(args.out_period_scan, args.obj, args.dof, args.sec, out=args.out)
