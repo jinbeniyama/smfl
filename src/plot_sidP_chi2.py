@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Plot sidereal period vs. chi square.
+"""Plot sidereal period vs. chi square.
+
 If len(out_period_scan) > 1 (i.e., N_mc > 0),
 the uncertainty of rotation period is given by its standard deviation.
 If len(out_period_scan) == 1 (i.e., N_mc = 1),
@@ -15,9 +15,6 @@ import matplotlib.pyplot as plt
 
 from calcerror import round_error
 from smfl import plotstyle
-
-# TODO: Add confidence level
-# TODO: Why period scan results are not ordered by rotP?
 
 
 if __name__ == "__main__":
