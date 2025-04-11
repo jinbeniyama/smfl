@@ -1,12 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Plot sidereal period vs. chi square.
 """
-import os
+Plot sidereal period vs. chi square.
+If len(out_period_scan) > 1 (i.e., N_mc > 0),
+the uncertainty of rotation period is given by its standard deviation.
+If len(out_period_scan) == 1 (i.e., N_mc = 1),
+the uncertainty of rotation period is estimated using chi-square values.
+The same approach in Fatka+2025, A&A, is used in the code.
+This is 3-sigma-"like" uncertainty.
+"""
 from argparse import ArgumentParser as ap
 import numpy as np
 import matplotlib.pyplot as plt  
-import datetime
 
 from calcerror import round_error
 from smfl import plotstyle
