@@ -124,7 +124,11 @@ def plot_chi2_rotP(out_period_scan, obj, dof, Psec=False, out="chi2_rotP.jpg"):
     # the analysis would be complex.
     P_cand, chi2_cand, chi2_3sigma = calc_confidence_chi2(p_list, chi2_list, dof)
     # Plot candidates
-    for p, c in zip(P_cand, chi2_cand):
+    for idx, (p, c) in enumerate(zip(P_cand, chi2_cand)):
+        if Psec:
+            print(f"P_cand {idx} = {p:.5f} s (chi2 = {c:.5f})")
+        else:
+            print(f"P_cand {idx} = {p:.5f} h (chi2 = {c:.5f})")
         ax.scatter(p, c,  color="blue", s=100, fc="None", marker="o")
 
     ax.set_title(f"{obj} (dof={dof})")
