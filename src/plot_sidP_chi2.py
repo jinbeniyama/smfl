@@ -35,10 +35,6 @@ if __name__ == "__main__":
     # Number of trials with Monte Carlo technique
     N_mc = len(args.out_period_scan)
 
-    # Object name for filename
-    obj_filename = args.obj.replace(" ", "")
-  
-  
     fig = plt.figure(figsize=(8, 6))
     ax = fig.add_axes([0.15, 0.15, 0.8, 0.80-0.05])
     # Margin for object name in title
