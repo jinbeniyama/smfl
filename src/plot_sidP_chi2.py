@@ -84,7 +84,7 @@ def plot_chi2_rotP(out_period_scan, obj, dof, Psec=False, out="chi2_rotP.jpg"):
         ax.set_xlabel("Sidereal period [s]")
     else:
         ax.set_xlabel("Sidereal period [h]")
-    ylabel = "Reduced $\chi^2$ (renormalized to 1)"
+    ylabel = "Reduced $\chi^2$ (min is normalized to 1)"
     ax.set_ylabel(ylabel)
   
     offset = 0
@@ -125,9 +125,9 @@ def plot_chi2_rotP(out_period_scan, obj, dof, Psec=False, out="chi2_rotP.jpg"):
     P_cand, chi2_cand, chi2_3sigma = calc_confidence_chi2(p_list, chi2_list, dof)
     # Plot candidates
     for p, c in zip(P_cand, chi2_cand):
-        ax.scatter(p, c,  color="red", marker="o")
+        ax.scatter(p, c,  color="blue", s=100, fc="None", marker="o")
 
-    ax.set_title(f"{obj}")
+    ax.set_title(f"{obj} (dof={dof})")
     plt.savefig(out)
     plt.close()
 
