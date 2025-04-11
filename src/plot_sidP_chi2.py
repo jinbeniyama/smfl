@@ -82,7 +82,7 @@ def plot_chi2_rotP(out_period_scan, obj, Psec=False, out="chi2_rotP.jpg"):
         ax.set_xlabel("Sidereal period [s]")
     else:
         ax.set_xlabel("Sidereal period [h]")
-    ylabel = "Reduced $\chi^2$ (normalized to 1)"
+    ylabel = "Reduced $\chi^2$ (renormalized to 1)"
     ax.set_ylabel(ylabel)
   
     offset = 0
@@ -108,10 +108,12 @@ def plot_chi2_rotP(out_period_scan, obj, Psec=False, out="chi2_rotP.jpg"):
     zip_lists = zip(p_list, chi2_list)
     zip_sort = sorted(zip_lists)
     p_list, chi2_list = zip(*zip_sort)
+    # Normalize chi2 with the best value
+    chi2_min = np.min(chi2_list)
+    chi2_norm_list = [x/chi2_min for x in chi2_list]
 
     col, _ = plotstyle(0)
-    # TODO: Normalize to the unity
-    ax.scatter(p_list, chi2_list, s=30, color=col, marker="x")
+    ax.scatter(p_list, chi2_norm_list, s=30, color=col, marker="x")
     
     # Estimate uncertainty of rotation period 
     # The same approach with Fatka+2025
