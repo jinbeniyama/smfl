@@ -250,6 +250,6 @@ if __name__ == "__main__":
     N_mc = len(args.out_period_scan)
 
     if N_mc > 1:
-        plot_chi2_rotP_MC(out_period_scan, args.obj, args.sec, out=args.out)
+        plot_chi2_rotP_MC(args.out_period_scan, args.obj, args.sec, out=args.out)
     else:
-        plot_chi2_rotP(out_period_scan, args.obj, args.sec, out=args.out)
+        plot_chi2_rotP(args.out_period_scan, args.obj, args.sec, out=args.out)
