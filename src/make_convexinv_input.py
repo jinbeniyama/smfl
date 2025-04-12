@@ -36,6 +36,7 @@ import os
 from argparse import ArgumentParser as ap
 import numpy as np
 
+from smfl import golden_spiral_G10, mean_angular_spacing
 
 if __name__ == "__main__":
     parser = ap(description="Create input of convexinv with arbitary settings")
@@ -54,6 +55,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--Nbeta", type=int, default=1, 
         help="number of ecliptic latitude")
+    parser.add_argument(
+        "--N_golden", type=int, default=None, 
+        help="Number of poles")
     parser.add_argument(
         "-a", type=int, default=0.5, 
         help="phase funct. param a (amplitude)")
@@ -91,6 +95,8 @@ if __name__ == "__main__":
     if args.lam:
         lam = [args.lam]
         beta = [args.beta]
+    if args.N_golden:
+        lam, beta = golden_spiral_spherical(args.N_golden)
     else:
         lam = np.linspace(0, 360, args.Nlam)
         beta = np.linspace(-90, 90, args.Nbeta)
@@ -114,10 +120,9 @@ if __name__ == "__main__":
     else:
         fix_beta   = 1
         fix_lambda = 1
-  
     
-    for l in lam:
-        for b in beta:
+    if args.N_golden:
+        for l, b in zip(lam, beta):
             # This is for N(lam)==N(beta)==1
             if args.out:
                 out = args.out
@@ -148,4 +153,37 @@ if __name__ == "__main__":
                 f.write(f"{args.c} 0\n")
                 # iteration stop condition
                 f.write(f"{Niter}")
+    else:
+        for l in lam:
+            for b in beta:
+                # This is for N(lam)==N(beta)==1
+                if args.out:
+                    out = args.out
+                else:
+                    out = f"input_ci_{int(l)}_{int(b)}"
+                out = os.path.join(outdir, out)
+                with open(out, "w") as f:
+                    f.write(f"{l} {fix_lambda}\n")
+                    f.write(f"{b} {fix_beta}\n")
+                    f.write(f"{sidP} {fix_P}\n")
+                    # Zero time
+                    f.write(f"0\n")
+                    # Initial rotation angle
+                    f.write(f"0\n")
+                    # convexity regularization      
+                    f.write(f"0.1\n")
+                    # degree and order of spherical harmonics expansion
+                    f.write(f"6 6\n")
+                    # number of rows        
+                    f.write(f"8\n")
+                    # phase funct. param. 'a' (0/1 - fixed/free)  
+                    f.write(f"{args.a} 0\n")
+                    # phase funct. param. 'd' (0/1 - fixed/free) 
+                    f.write(f"{args.d} 0\n")
+                    # phase funct. param. 'k' (0/1 - fixed/free) 
+                    f.write(f"{args.k} 0\n")
+                    # Lambert coefficient 'c' (0/1 - fixed/free)      
+                    f.write(f"{args.c} 0\n")
+                    # iteration stop condition
+                    f.write(f"{Niter}")
                 

@@ -41,6 +41,8 @@ def adderr(*args):
     return err
 
 
+
+
 def time_keeper(func):
     """
     Decorator to measure time.
@@ -493,3 +495,71 @@ def tbinning(
     print(f"(after binning ) N_data={len(df_bin)}, mean fluxerr={np.mean(df_bin[key_fluxerr]):.2f}")
     return df_bin
 
+
+def golden_spiral_G10(N):
+    """Generate evenly distributed points on a sphere using a symmetric golden spiral.
+
+    Parameters
+    ----------
+    N : int
+        Half the number of points minus one. 
+        The total number of output points will be 2N + 1.
+
+    Returns
+    -------
+    lon : ndarray of shape (2N + 1,)
+        Longitudes of the points in degrees, in the range [0, 360].
+
+    lat : ndarray of shape (2N + 1,)
+        Latitudes of the points in degrees, in the range [-90, 90].
+
+
+    Reference
+    ---------
+    González 2010, Math Geosci (2010) 42: 49–64.
+    """
+
+    phi = (1 + np.sqrt(5)) / 2  # golden ratio
+    i = np.arange(-N, N + 1)
+    lat = np.arcsin(2 * i / (2 * N + 1)) * 180 / np.pi
+
+    # fractional part of i * golden ratio, mapped to [0, 1)
+    frac = np.mod(i * phi, 1.0)
+    # map to [0, 360)
+    lon = frac * 360  
+    return lon, lat
+
+
+def mean_angular_spacing(lon, lat):
+    """Estimate the mean angular spacing between points on a sphere in degrees.
+
+    Parameters
+    ----------
+    lon : ndarray
+        Longitudes of points in degrees.
+    lat : ndarray
+        Latitudes of points in degrees.
+
+    Returns
+    -------
+    mean_spacing : float
+        Mean angular spacing (degrees) between nearest neighbor points on the sphere.
+    """
+    # Convert to Cartesian coordinates on the unit sphere
+    lon_rad = np.deg2rad(lon)
+    lat_rad = np.deg2rad(lat)
+    x = np.cos(lat_rad) * np.cos(lon_rad)
+    y = np.cos(lat_rad) * np.sin(lon_rad)
+    z = np.sin(lat_rad)
+    xyz = np.vstack([x, y, z]).T
+
+    # Use KDTree to find nearest neighbors
+    tree = cKDTree(xyz)
+    # first one is itself, second is nearest neighbor
+    dist, _ = tree.query(xyz, k=2)  
+
+    # Convert chord distance to angle (arc length)
+    angular_dist_rad = 2 * np.arcsin(dist[:, 1] / 2)
+    angular_dist_deg = np.rad2deg(angular_dist_rad)
+
+    return np.mean(angular_dist_deg)
