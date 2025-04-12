@@ -9,7 +9,7 @@ import itertools
 from argparse import ArgumentParser as ap
 import numpy as np
 
-from smfl import do_conv, do_conv_final
+from smfl import do_conv, do_conv_final, golden_spiral_G10
 
 
 if __name__ == "__main__":
@@ -26,6 +26,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--Nbeta", type=int, default=1, 
         help="number of ecliptic latitude")
+    parser.add_argument(
+        "--N_golden", type=int, default=None, 
+        help="Number of poles")
     parser.add_argument(
         "--N_p", type=int, default=4, 
         help="number of processes")
@@ -66,19 +69,26 @@ if __name__ == "__main__":
      
     # Starting time 
     t0 = time.time()
-
-    lam = np.linspace(0, 360, args.Nlam)
-    beta = np.linspace(-90, 90, args.Nbeta)
+    
+    if args.N_golden:
+        lam, beta = golden_spiral_G10(args.N_golden)
+        # Create combinations
+        params = [(l, b, lc, lcdir, inpdir, resdir) for l, b in zip(lam, beta)]
+        print(f"  Number of iterations N_iter = {len(params)}")
+    
+    else:
+        lam = np.linspace(0, 360, args.Nlam)
+        beta = np.linspace(-90, 90, args.Nbeta)
   
-    # TODO: accept multiple input
-    # Use all *lcs in lcdir
-    #lc = f"{lcdir}/*lcs"
-    #assert False, "Check the code for multiple lcs."
+        # TODO: accept multiple input
+        # Use all *lcs in lcdir
+        #lc = f"{lcdir}/*lcs"
+        #assert False, "Check the code for multiple lcs."
 
-    # Create combinations
-    params = [(l, b, lc, lcdir, inpdir, resdir) 
-        for l, b in itertools.product(lam, beta)]
-    print(f"  Number of iterations N_iter = {len(params)}")
+        # Create combinations
+        params = [(l, b, lc, lcdir, inpdir, resdir) 
+            for l, b in itertools.product(lam, beta)]
+        print(f"  Number of iterations N_iter = {len(params)}")
 
     n_p = args.N_p
     with multiprocessing.Pool(processes=n_p) as pool:
