@@ -27,8 +27,10 @@ from argparse import ArgumentParser as ap
 import numpy as np
 import matplotlib.pyplot as plt  
 import matplotlib
+from matplotlib.colors import LogNorm
+from scipy.interpolate import griddata
 
-from smfl import nobs_lc
+from smfl import nobs_lc, golden_spiral_G10
 
 
 def chi2_CI(N=2, M=1, nu=None, sigma=3):
@@ -69,11 +71,11 @@ if __name__ == "__main__":
         "--Nbeta", type=int, default=1, 
         help="number of ecliptic latitude")
     parser.add_argument(
-        "--nu", type=int, default=1000, 
-        help="degree of freedom ")
+        "--N_golden", type=int, default=None, 
+        help="Number of poles")
     parser.add_argument(
-        "--lc", type=str, default=None, 
-        help="Formatted lightcurve to calculate the number of obs.")
+        "--dof", type=int, default=1000, 
+        help="degree of freedom ")
     parser.add_argument(
         "--sigma", type=float, default=3, 
         help="CI level")
@@ -86,23 +88,28 @@ if __name__ == "__main__":
     parser.add_argument(
         "--resdir", type=str, default="convex_result",
         help="Directory for results of convexinv")
+    parser.add_argument(
+        "--out", type=str, default="polemap.png",
+        help="Output finename")
     args = parser.parse_args()
  
     # Color map
     cm = "inferno"
-
-    # Number of data
-    Nlam = args.Nlam
-    Nbeta = args.Nbeta
-    
     # Normalization
     norm = args.norm
 
-    lam = np.linspace(0, 360, Nlam)
-    beta = np.linspace(-90, 90, Nbeta)
-    # Make grid
-    xx, yy = np.meshgrid(lam, beta)
-    data = np.c_[xx.ravel(), yy.ravel()]
+    # Number of data
+    if args.N_golden:
+        lam, beta = golden_spiral_G100(args.N_golden)
+        # Make grid
+        data = np.c_[lam, beta]
+        xx, yy  = np.meshgrid(np.linspace(0, 360, 200), np.linspace(-90, 90, 100))
+    else:
+        lam = np.linspace(0, 360, args.Nlam)
+        beta = np.linspace(-90, 90, args.Nbeta)
+        # Make grid
+        xx, yy = np.meshgrid(lam, beta)
+        data = np.c_[xx.ravel(), yy.ravel()]
 
     # List for chi2 values
     chi2_list = []
@@ -148,44 +155,54 @@ if __name__ == "__main__":
             rotP_list.append(float(rotP))
             dfac_list.append(float(dfac))
 
-
-
-    lam = np.linspace(-180, 180, Nlam)
-    beta = np.linspace(-90, 90, Nbeta)
-    # Make grid
-    xx, yy = np.meshgrid(lam, beta)
-    data = np.c_[xx.ravel(), yy.ravel()]
-
-
     chi2_min = np.min(chi2_list)
+    # See Fatka+2025
+    # Assume nu = N - M ~ N (i.e., N >> M)
+    nu = args.dof
+    CI = chi2_CI(nu=nu, sigma=args.sigma)
+    print(f"{args.sigma}-sigma CI is {CI:.2f}")
+
     if norm:
         Z_chi2 = [x/chi2_min for x in chi2_list]
-        # percentage from the minima
-        Z_chi2 = [(x-1)*100 for x in Z_chi2]
-
         Z_chi2 = np.array(Z_chi2)
-        #Z_rotP = np.array(Z_rotP)
-        label_chi2 = r"$\chi^2$ [%]"
+        label_chi2 = r"$\chi^2$ (normalized with min)"
+        levels_CI = [1 + CI]
+        print(f"{args.sigma}-sigma range is 1 to (1 + CI)")
+        print(f"  -> chi2: 1 to {1 + CI:.2f}")
     else:
         Z_chi2 = np.array(chi2_list)
         label_chi2 = r"$\chi^2$"
+        # Where from?
+        levels_CI = [chi2_min*(1 + CI)]
+        print(f"{args.sigma}-sigma range is chi2_min to chi2_min(1 + CI)")
+        print(f"  -> chi2: {chi2_min:.2f} to {chi2_min*(1 + CI):.2f}")
 
     Z_rotP = np.array(rotP_list)
     Z_dfac = np.array(dfac_list)
+    
+    if args.N_golden:
+        Z_chi2 = griddata((lam, beta), Z_chi2, (xx, yy), method='linear')
+        Z_rotP = griddata((lam, beta), Z_rotP, (xx, yy), method='linear')
+        Z_dfac = griddata((lam, beta), Z_dfac, (xx, yy), method='linear')
 
-    Z_chi2 = Z_chi2.reshape(xx.shape)
-    Z_rotP = Z_rotP.reshape(xx.shape)
-    Z_dfac = Z_dfac.reshape(xx.shape)
+    else:
+        Z_chi2 = Z_chi2.reshape(xx.shape)
+        Z_rotP = Z_rotP.reshape(xx.shape)
+        Z_dfac = Z_dfac.reshape(xx.shape)
 
     fig = plt.figure(figsize=(8, 14))
     
-    ax1 = fig.add_axes([0.15, 0.72, 0.63, 0.25], projection="mollweide")
+    # mollweide does not work well......
+    #ax1 = fig.add_axes([0.15, 0.72, 0.63, 0.25], projection="mollweide")
+    ax1 = fig.add_axes([0.15, 0.72, 0.63, 0.25])
     cax1 = fig.add_axes([0.80, 0.72, 0.03, 0.25])
 
-    ax2 = fig.add_axes([0.15, 0.40, 0.63, 0.25], projection="mollweide")
+    #ax2 = fig.add_axes([0.15, 0.40, 0.63, 0.25], projection="mollweide")
+    ax2 = fig.add_axes([0.15, 0.40, 0.63, 0.25])
     cax2 = fig.add_axes([0.80, 0.40, 0.03, 0.25])
 
-    ax3 = fig.add_axes([0.15, 0.08, 0.63, 0.25], projection="mollweide")
+    #ax3 = fig.add_axes([0.15, 0.08, 0.63, 0.25], projection="mollweide")
+    ax3 = fig.add_axes([0.15, 0.08, 0.63, 0.25])
     cax3 = fig.add_axes([0.80, 0.08, 0.03, 0.25])
 
     y_formatter = matplotlib.ticker.ScalarFormatter(useOffset=False)
@@ -199,35 +216,21 @@ if __name__ == "__main__":
     ax2.set_ylabel(r"$\beta$ [deg]")
     ax3.set_ylabel(r"$\beta$ [deg]")
 
-    im = ax1.contourf(xx, yy, Z_chi2, zorder=-1, cmap=cm)
+    levels_cont = 100
+    im = ax1.contourf(
+        xx, yy, Z_chi2, zorder=-1, cmap=cm, levels=levels_cont)
     cbar = fig.colorbar(
         im,  cax=cax1, orientation='vertical', label=label_chi2)
-    
-    # How to calculate nu ?
-    # Assume nu = N - M ~ N (i.e., N >> M)
-    if args.lc:
-        N = nobs_lc(args.lc)
-        nu = N
-    else:
-        nu = args.nu
-    CI = chi2_CI(nu=nu, sigma=args.sigma)
-    print(f"{args.sigma}-sigma CI is {CI:.2f}")
-    # Where from?
-    print(f"{args.sigma}-sigma range is chi2_min to chi2_min(1 + CI)")
-    print(f"  -> chi2: {chi2_min:.2f} to {chi2_min*(1 + CI):.2f}")
-    # Add CI line
-    levels = [chi2_min*(1 + CI)]
-    ax1.contour(
-        xx, yy, Z_chi2, levels, linestyles=["dashed"], colors="white")
-        #xx, yy, Z_chi2, linestyles=["dashed"], colors="white")
 
+    # Add CI line
+    ax1.contour(
+        xx, yy, Z_chi2, levels_CI, linestyles=["dashed"], colors="white")
+        #xx, yy, Z_chi2, linestyles=["dashed"], colors="white")
     im = ax2.contourf(xx, yy, Z_rotP, zorder=-1, cmap=cm)
     cbar = fig.colorbar(
         im,  cax=cax2, orientation='vertical', label=r"$Period [s]$")
-
     im = ax3.contourf(xx, yy, Z_dfac, zorder=-1, cmap=cm)
     cbar = fig.colorbar(
         im,  cax=cax3, orientation='vertical', label="Dark facet area [%]")
 
-    out = f"pole_solution_Nlam{Nlam}_Nbeta{Nbeta}_norm{norm}.{args.outtype}"
-    plt.savefig(out)
+    plt.savefig(args.out)
