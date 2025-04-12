@@ -70,8 +70,8 @@ if __name__ == "__main__":
         "--beta", type=float, default=10, 
         help="pole latitude in deg")
     parser.add_argument(
-        "--outtype", type=str, default="jpg",
-        help="format of output figures")
+        "--out", type=str, default="obliq.jpg",
+        help="Output filename")
     args = parser.parse_args()
  
     # Color map
@@ -100,9 +100,6 @@ if __name__ == "__main__":
         obliq = calc_obliq(l, b, incl, LoA)
         obliq_list.append(obliq)
 
-    lam = np.linspace(-180, 180, Nlam)
-    beta = np.linspace(-90, 90, Nbeta)
-
     # Make grid
     xx, yy = np.meshgrid(lam, beta)
     data = np.c_[xx.ravel(), yy.ravel()]
@@ -130,5 +127,4 @@ if __name__ == "__main__":
             args.lam, args.beta, marker="*", color="green", s=400, ec="black", 
             label=label_pole)
     ax1.legend().get_frame().set_alpha(1.0)
-    out = f"obliq.jpg"
-    plt.savefig(out)
+    plt.savefig(args.out)
