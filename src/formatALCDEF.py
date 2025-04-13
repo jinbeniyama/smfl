@@ -48,6 +48,12 @@ if __name__ == "__main__":
     parser.add_argument(
         "out", type=str,
         help="output filename wo/ extension")
+    parser.add_argument(
+        "--f_max", type=float, default=False,
+        help="Maximum flux to be saved")
+    parser.add_argument(
+        "--snr_min", type=float, default=False,
+        help="Minimum SNR to be saved")
     args = parser.parse_args()
    
 
@@ -71,9 +77,21 @@ if __name__ == "__main__":
     with open(args.lc, "r") as f:
         lines = f.readlines()
         n_obs = 0
+        sdate0 = "999"
 
         for l in lines:
-            if l[0:5]=="DATA=":
+            if l[0:11] == "SESSIONDATE":
+                l_sp = l.split("=")
+                sdate = l_sp[1].replace("\n", "")
+                print(f"SESSION DATE: {sdate} (n_obs={n_obs})")
+                if sdate == sdate0:
+                    pass
+                else:
+                    # Update date (n_obs)
+                    n_obs += 1
+                    sdate_list.append(sdate)
+                    sdate0 = sdate
+            elif l[0:5]=="DATA=":
                 jd, mag, magerr = l[5:].split("|")
                 jd_list.append(float(jd))
                 mag_list.append(float(mag))
@@ -86,13 +104,6 @@ if __name__ == "__main__":
                 l_sp = l.split("=")
                 code = l_sp[1].replace("\n", "")
                 print(f"MPCCODE: {code} (n_obs={n_obs})")
-            elif l[0:11] == "SESSIONDATE":
-                l_sp = l.split("=")
-                sdate = l_sp[1].replace("\n", "")
-                print(f"SESSION DATE: {sdate} (n_obs={n_obs})")
-                sdate_list.append(sdate)
-                # Update n_obs
-                n_obs += 1
             else:
                 pass
 
@@ -137,5 +148,10 @@ if __name__ == "__main__":
     # Save separately
     for nobs, fname in zip(sorted(list(set(nobs_list))), sdate_list):
         df_temp = df[df["n_obs"] == nobs]
+        # Remove outliers
+        if args.f_max:
+            df_temp = df_temp[df_temp["flux_cor"] < args.f_max]
+        if args.snr_min:
+            df_temp = df_temp[df_temp["flux_cor"]/df_temp["fluxerr_cor"] > args.snr_min]
         out = f"{args.out}_{fname}.txt"
         df_temp.to_csv(out, sep=" ", index=False)
