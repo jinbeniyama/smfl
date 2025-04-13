@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Format lightcurves in ALCDEF.
-Input lightcurves have time in jd, flux, and fluxerr (for Monte Carlo trials).
+"""Format lightcurves downloaded from ALCDEF (https://alcdef.org/).
+
+Output file has such as "jd (time in jd)", "flux", and "fluxerr" (for Monte Carlo trials).
 Arbitrary keywords can be used with key_jd, key_flux, and key_fluxerr options.
+After using this script, you can format lightcurves for convex inversion with "format4convexinv.py".
 """
-import sys
 import numpy as np
 import pandas as pd
 from argparse import ArgumentParser as ap
 
-from smfl import format4inv, Ariadnetestdata, save4inv, calc_JPLephem, tbinning
+from smfl import calc_JPLephem
 
 
 if __name__ == "__main__":
@@ -36,21 +36,18 @@ if __name__ == "__main__":
             else:
                 pass
 
-    # Convert mag to flux
-    #   m = -2.5log10(f) + C1
-    #   f = 10**(-(m-C1)/2.5)
-    #     = C2*10**(-m/2.5)
-    flux_list = [10**(-m/2.5) for m in mag_list]
-    # Normalize by mean
-    C = np.mean(flux_list)
-    flux_list = [x/C for x in flux_list]
+    df = pd.DataFrame({"jd": jd_list, "mag":mag_list, "magerr":magerr_list})
 
-    # Assume S/N >> 1 
-    fluxerr_list = [1-10**(-merr/2.5) for merr in magerr_list]
+    # Set mean mag to 0
+    key_mag, key_magerr = "mag", "magerr"
+    df[key_mag] = df[key_mag] - np.mean(df[key_mag])
+    # F    = 10**(-0.4*mag)
+    # Ferr = 0.4*log_e(10)*F*magerr
+    df["flux_cor"] = 10**(-0.4*df[key_mag])
+    df["fluxerr_cor"] = 0.4*np.log(10)*df["flux_cor"]*df[key_magerr]
 
-    
-    # TODO: lt correction?
-    df = pd.DataFrame(
-        dict(jd=jd_list, flux=flux_list, fluxerr=fluxerr_list, mag=mag_list, magerr=magerr_list))
+    ## TODO: lt correction?
+    #df = pd.DataFrame(
+    #    dict(jd=jd_list, flux=flux_list, fluxerr=fluxerr_list, mag=mag_list, magerr=magerr_list))
 
-    df.to_csv(args.out, sep=" ")
+    df.to_csv(args.out, sep=" ", index=False)
