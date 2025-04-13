@@ -100,7 +100,7 @@ if __name__ == "__main__":
 
     # Number of data
     if args.N_golden:
-        lam, beta = golden_spiral_G100(args.N_golden)
+        lam, beta = golden_spiral_G10(args.N_golden)
         # Make grid
         data = np.c_[lam, beta]
         xx, yy  = np.meshgrid(np.linspace(0, 360, 200), np.linspace(-90, 90, 100))
