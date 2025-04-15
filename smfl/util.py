@@ -12,7 +12,6 @@ and x_earth, y_earth, z_earth (earth cartesian coordinate from the object).
 """
 import os 
 import subprocess
-from argparse import ArgumentParser as ap
 import numpy as np
 import pandas as pd
 from scipy import interpolate
