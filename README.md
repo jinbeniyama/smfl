@@ -113,6 +113,18 @@ I would like to express the gratitude to the people involved in [DAMIT](https://
 The original paper of DAMIT is 
 [Ďurech et al. (2010), DAMIT: a database of asteroid models, A&A, 513, A46](https://ui.adsabs.harvard.edu/abs/2010A%26A...513A..46D).
 
+## References
+- Kaasalainen and Torppa, 2001, Icarus, Vol. 153, 24.
+- Kaasalainen, Torppa, and Muinonen, 2001, Icarus, Vol. 153, 37.
+- Slivan et al. 2023, Icarus, Vol. 394, 115397. (period_scan is not used.)
+  - The guideline ultimately adopted was to iterate past period and pole
+    convergence only until the step change in the fit relative chi-squared decreased
+    to less than about 0.5%
+  - The expected symmetry of an object’s two ambiguous pole solutions
+    with respect to the ‘‘photometric great circle’’ (PGC) (Magnusson et al.,
+    1989) was used to perform a self-consistency check on each pair
+    of derived pole solutions, as a significant departure from symmetry
+    would indicate the presence of some problem with the analysis
 
 ## Dependencies
 This repository is depending on `Python`, `NumPy`, `pandas`, `SciPy`, `Astropy`, `Astroquery`, `DAMIT`.
