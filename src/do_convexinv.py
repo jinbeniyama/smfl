@@ -59,7 +59,8 @@ if __name__ == "__main__":
     lc = args.lc
 
  
-    # Fixed 1 period and pole
+    # Do convexinv to make a final model 
+    # with estimated sidereal period and pole orientation
     if args.final:
         findir = args.findir
         os.makedirs(findir, exist_ok=True)
