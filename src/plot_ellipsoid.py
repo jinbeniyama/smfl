@@ -15,10 +15,7 @@ from argparse import ArgumentParser as ap
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt  
-import datetime
-import seaborn as sns
 import matplotlib
-import warnings
 from scipy.spatial import ConvexHull
 
 from smfl import mycolor, fit_ellipsoid, draw_ellipsoid
