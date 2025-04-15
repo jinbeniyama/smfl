@@ -41,7 +41,7 @@ From this plot, we get a sidereal period of the target. There are several ways t
 
 4. Make input files of convexinv.
 After we get a sidereal period of the target, let's constrain pole orientation next.
-Input files of convexinv (e.g., input_ci_0_-90) are saved in `convex_input` by default.
+Input files of convexinv (e.g., `input_ci_0_-90`) are saved in `convex_input` by default.
 In this process, both sidereal period and pole orientation should be fixed as far as I know.
 As a test, you can make input files specifying the size of longtitude (`L`) and latitude (`M`) as follows.
 The number of combination of longitude and latitude is `LxM`.
@@ -58,12 +58,14 @@ make_convexinv_input.py --sidP (sidereal period in hour) --N_golden (number of p
 
 
 5. Do convexinv.
-Input files of convexinv (e.g., input_ci_0_-90) in `convex_input` are used by default.
-All results and intermediate files of convexinv (e.g., outarea_ci_0_-90, outlcs_ci_0_-90, outpar_ci_0_-90, res_ci_0_-90) are saved in `convex_result` by default.
+Input files of convexinv (e.g., `input_ci_0_-90`) in `convex_input` are used by default.
+All results and intermediate files of convexinv (e.g.,`outarea_ci_0_-90`, `outlcs_ci_0_-90`, `outpar_ci_0_-90`, `res_ci_0_-90`) are saved in `convex_result` by default.
 ```
-[Nlam and Nbeta should be the same with 4.]
-do_convexinv.py --Nlam (number of longitude) --Nbeta (number of latitude) 
---lc (lc created in 1.)
+[Nlam and Nbeta should be the same with 4., test]
+do_convexinv.py --lc (lc created in 1.) --Nlam (number of longitude) --Nbeta (number of latitude) 
+
+[N_golden should be the same with 4., golden spiral algorithm]
+do_convexinv.py --lc (lc created in 1.) --N_golden (number of pole) 
 ```
 
 6. Plot pole solution with chi2.
@@ -71,6 +73,7 @@ Image is saved in the current directory.
 ```
 plot_polesolution.py --Nlam (number of longitude) --Nbeta (number of latitude)
 ```
+From this plot, we constrain pole orientation. Again, there are several ways to estimate uncertainty of the pole orientation such as boot-strap method, Monte-Carlo method, and 3-sigma-like threshold (See Fatka et al. 2025, A&A for details). The determination of the pole orientation is very important.
 
 7. Create model with fixed period and pole
 ```
