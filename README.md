@@ -101,11 +101,8 @@ The original paper of DAMIT is
 
 
 ## Dependencies
-
-This library is depending on `NumPy`, `SciPy`, `SEP`, `Astropy` 
-and `Astroquery`.
-Scripts are developed on `Python 3.7.10`, `NumPy 1.19.2`, `SciPy 1.6.1`,
-`SEP 1.0.3`, `Astropy 4.2` and `Astroquery 0.4.1`.
+This repository is depending on `Python`, `NumPy`, `pandas`, `SciPy`, `Astropy`, `Astroquery`, `DAMIT`.
+Scripts are developed on `Python 3.9.6`, `NumPy 1.26.4`, `pandas 2.2.3`, `SciPy 1.13.1`, `Astropy 6.0.1`, `Astroquery 0.4.9.post1`, `DAMIT 0.2.1`.
 
 ## LICENCE
 
