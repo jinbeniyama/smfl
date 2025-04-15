@@ -53,19 +53,17 @@ if __name__ == "__main__":
     args = parser.parse_args()
  
     resdir = args.resdir
-    findir = args.findir
     os.makedirs(resdir, exist_ok=True)
-    os.makedirs(findir, exist_ok=True)
     inpdir = args.inpdir
-
     lcdir = args.lcdir
     lc = args.lc
 
  
-    # Fixed period and pole
+    # Fixed 1 period and pole
     if args.final:
+        findir = args.findir
+        os.makedirs(findir, exist_ok=True)
         do_conv_final(args.lam, args.beta, lc, lcdir, inpdir=inpdir, outdir=findir)
-
      
     # Starting time 
     t0 = time.time()
