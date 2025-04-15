@@ -125,6 +125,17 @@ The original paper of DAMIT is
     1989) was used to perform a self-consistency check on each pair
     of derived pole solutions, as a significant departure from symmetry
     would indicate the presence of some problem with the analysis
+- Fatka et al. 2025, A&A, Vol. 695, A139.
+  - Sidereal period is estimated with `period_scan`
+  - chi-squared values are normalized such that the global minimum equaled 1
+  - Using the inverse cumulative distribution function of the chi-squared distribution, 
+    3-sigma threshold for a confidence level of 0.9973 and the degrees of freedom in the model is calculated
+  - During this step (constraining pole orientation), sidereal period and pole prientation were fixed
+- Vokrouhlicky et al. 2017, AJ, 153, 270.
+  - number of parameters are 87 for two targets
+  - I guess 3 parameters for spin, 3 parameters for scattering, 9x9 parameters for shape
+- Hanus et al. 2023, A&A, Vol. 679, A56.
+  - 3 parameters for spin, 3 parameters for scattering, 7x7 parameters for shape
 
 ## Dependencies
 This repository is depending on `Python`, `NumPy`, `pandas`, `SciPy`, `Astropy`, `Astroquery`, `DAMIT`.
