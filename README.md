@@ -23,12 +23,10 @@ format4convexinv.py (lc1) (lc2) (lc3) --jpl (jpl1) (jpl2) (jpl3) --obj (obj) --o
 
 2. Search sidereal period with period_scan.
 The result of `period_scan` is saved in the current directory.
+Previously I used a Python wrapper to search a sidereal period, but I realized that just doing `cat lc | period_scan ...` is easier.
 ```
 [single lightcurve]
-search_sidP.py (lc) --inp (inputfile) --out (out)
-
-[multiple lightcurve for MC technique]
-search_sidP.py (lc1) (lc2) --inp (inputfile) --out (out)
+cat (lc) | period_scan -v (input_ps) (out_ps)
 ```
 
 3. Plot sidereal period vs. chi2.
