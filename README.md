@@ -37,14 +37,25 @@ plot_sidP_chi2.py (obj) (out of 2.)
 [multiple lightcurve for MC technique]
 plot_sidP_chi2.py (obj) (out of 2.-1) (out of 2.-2) (out of 2.-3)
 ```
+From this plot, we get a sidereal period of the target. There are several ways to estimate uncertainty of the sidereal period such as boot-strap method, Monte-Carlo method, and 3-sigma-like threshold (See Fatka et al. 2025, A&A for details). The determination of the sidereal period is very important; if we use a different sidereal period, we get different pole solution and shape model. Please be very catreful!
 
 4. Make input files of convexinv.
+After we get a sidereal period of the target, let's constrain pole orientation next.
 Input files of convexinv (e.g., input_ci_0_-90) are saved in `convex_input` by default.
+In this process, both sidereal period and pole orientation should be fixed as far as I know.
+As a test, you can make input files specifying the size of longtitude (`L`) and latitude (`M`) as follows.
+The number of combination of longitude and latitude is `LxM`.
 ```
-[pole fixed]
-make_convexinv_input.py --sidP (sidereal period in hour) 
---Nlam (number of longitude) --Nbeta (number of latitude)  --fixpole
+[period and pole fixed, test]
+make_convexinv_input.py --sidP (sidereal period in hour) --Nlam (number of longitude) --Nbeta (number of latitude) --fixP --fixpole --inpdir (directory for input files)
 ```
+
+For the paper, you can use the golden spiral algorithm as follows. The number of combination of longitude and latitude is `2N+1`.
+```
+[period and pole fixed, golden spiral algorithm]
+make_convexinv_input.py --sidP (sidereal period in hour) --N_golden (number of pole) --fixP --fixpole --inpdir (directory for input files)
+```
+
 
 5. Do convexinv.
 Input files of convexinv (e.g., input_ci_0_-90) in `convex_input` are used by default.
