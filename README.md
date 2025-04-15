@@ -136,6 +136,9 @@ The original paper of DAMIT is
   - I guess 3 parameters for spin, 3 parameters for scattering, 9x9 parameters for shape
 - Hanus et al. 2023, A&A, Vol. 679, A56.
   - 3 parameters for spin, 3 parameters for scattering, 7x7 parameters for shape
+- `convexinv_doc.pdf` in the DAMIT code
+  - 4 parameters for scattering (`a`, `d`, `k`, and `c`)
+  - parameter `c` has usually only little effect on the solution so you can fix it at, e.g., `c = 0.1`
 
 ## Dependencies
 This repository is depending on `Python`, `NumPy`, `pandas`, `SciPy`, `Astropy`, `Astroquery`, `DAMIT`.
