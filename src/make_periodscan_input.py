@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Make input files of period_scan.
+p = 0.8 (for coarse search) and p=0.1 (fine search) are good choices.
 
 Note from convexinv_doc.pdf
 ---------------------------
