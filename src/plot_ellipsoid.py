@@ -140,6 +140,7 @@ if __name__ == "__main__":
     print(f"radii        :  a,  b,  c = {a:.2f}, {b:.2f}, {c:.2f}")
 
     print(f"axial ratio  :  b/a,  c/a  = {b/a:.2f}, {c/a:.2f}")
+    print(f"             :  a/b,  a/c  = {a/b:.2f}, {a/c:.2f}")
 
     for ax in [ax1, ax2, ax3]:
         draw_ellipsoid([0, 0, 0], radii, evecs, ax=ax, plot_axes=True, cage_color='g')
