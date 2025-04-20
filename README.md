@@ -81,10 +81,11 @@ make_convexinv_input.py --sidP  (rotation period) --lam (longitude) --beta (lati
 do_convexinv.py --lcdir (directory of lc) --lc (lcs) --findir . --inpdir . --lam 259 --beta 84 --final
 ```
 
-8. Convert model to stl.
+8. Convert model to stl and obj
 ```
 [model, output of the process 7.]
 model2stl.py (model)
+model2obj.py (model)
 ```
 
 9. Plot lightcurves with model curves.
