@@ -359,9 +359,10 @@ def do_conv_final(lam, beta, lc, lcdir=".", inpdir=".", outdir="."):
     inp = f"input_ci_{int(l)}_{int(b)}"
     model = f"model_ci_{int(l)}_{int(b)}"
     outlc = f"outlcs_ci_{int(l)}_{int(b)}"
+    outpara = f"outpara_{int(l)}_{int(b)}"
 
     cmd = (
-        f"cat {lcdir}/{lc} | convexinv -s {inpdir}/{inp} {outdir}/{outlc} "
+        f"cat {lcdir}/{lc} | convexinv -s -p {outdir}/{outpara} {inpdir}/{inp} {outdir}/{outlc} "
         f"| minkowski | standardtri > {outdir}/{model}"
         )
     print(f"Execute\n  {cmd}")
