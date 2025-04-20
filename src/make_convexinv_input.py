@@ -95,7 +95,7 @@ if __name__ == "__main__":
     if args.lam:
         lam = [args.lam]
         beta = [args.beta]
-    if args.N_golden:
+    elif args.N_golden:
         lam, beta = golden_spiral_G10(args.N_golden)
     else:
         lam = np.linspace(0, 360, args.Nlam)
