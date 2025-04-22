@@ -84,7 +84,7 @@ def plot_chi2_rotP(out_period_scan, obj, dof, Psec=False, out="chi2_rotP.jpg"):
         ax.set_xlabel("Sidereal period [s]")
     else:
         ax.set_xlabel("Sidereal period [h]")
-    ylabel = "Reduced $\chi^2$ (min is normalized to 1)"
+    ylabel = "Normalized $\chi^2$ (min is normalized to 1)"
     ax.set_ylabel(ylabel)
   
     offset = 0
@@ -114,8 +114,7 @@ def plot_chi2_rotP(out_period_scan, obj, dof, Psec=False, out="chi2_rotP.jpg"):
     chi2_min = np.min(chi2_list)
     chi2_norm_list = [x/chi2_min for x in chi2_list]
 
-    col, _ = plotstyle(0)
-    ax.scatter(p_list, chi2_norm_list, s=30, color=col, marker="x")
+    ax.scatter(p_list, chi2_norm_list, s=30, color="black", marker="x")
     
     # Estimate uncertainty of rotation period 
     # The same approach with Fatka+2025
@@ -130,11 +129,16 @@ def plot_chi2_rotP(out_period_scan, obj, dof, Psec=False, out="chi2_rotP.jpg"):
         else:
             print(f"P_cand {idx} = {p:.5f} h (chi2 = {c:.5f})")
         if idx == 0:
-            label = r"$\chi^2 <$" + f"{chi2_3sigma:.2f}"
+            label = r"$\chi^2 <$" + f"{chi2_3sigma:.2f} (N={len(P_cand)})"
         else:
             label = None
         ax.scatter(
-            p, c,  color="blue", s=100, fc="None", marker="o", label=label)
+            p, c,  color="red", s=100, fc="None", marker="o", label=label)
+
+    # Add dashed line
+    xmin, xmax = ax.get_xlim()
+    ax.hlines(chi2_3sigma, xmin, xmax, ls="dashed", color="gray")
+    ax.set_xlim([xmin, xmax])
     
     ax.legend()
     ax.set_title(f"{obj} (dof={dof})")
@@ -164,7 +168,7 @@ def plot_chi2_rotP_MC(out_period_scan, obj, Psec=False, out="chi2_rotP_MC.jpg"):
         ax.set_xlabel("Sidereal period [s]")
     else:
         ax.set_xlabel("Sidereal period [h]")
-    ylabel = "Reduced $\chi^2$ (+offset)"
+    ylabel = "Normalized $\chi^2$ (+offset)"
     ax.set_ylabel(ylabel)
   
     offset = 0
