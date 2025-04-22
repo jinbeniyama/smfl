@@ -129,8 +129,14 @@ def plot_chi2_rotP(out_period_scan, obj, dof, Psec=False, out="chi2_rotP.jpg"):
             print(f"P_cand {idx} = {p:.5f} s (chi2 = {c:.5f})")
         else:
             print(f"P_cand {idx} = {p:.5f} h (chi2 = {c:.5f})")
-        ax.scatter(p, c,  color="blue", s=100, fc="None", marker="o")
-
+        if idx == 0:
+            label = r"$\chi^2 <$" + f"{chi2_3sigma:.2f}"
+        else:
+            label = None
+        ax.scatter(
+            p, c,  color="blue", s=100, fc="None", marker="o", label=label)
+    
+    ax.legend()
     ax.set_title(f"{obj} (dof={dof})")
     plt.savefig(out)
     plt.close()
