@@ -84,7 +84,7 @@ def plot_chi2_rotP(out_period_scan, obj, dof, Psec=False, out="chi2_rotP.jpg"):
         ax.set_xlabel("Sidereal period [s]")
     else:
         ax.set_xlabel("Sidereal period [h]")
-    ylabel = "Normalized $\chi^2$ (min is normalized to 1)"
+    ylabel = "$\chi^2$ (min is normalized to 1)"
     ax.set_ylabel(ylabel)
   
     offset = 0
@@ -107,9 +107,9 @@ def plot_chi2_rotP(out_period_scan, obj, dof, Psec=False, out="chi2_rotP.jpg"):
             dark_list.append(line[4])
     
     # Order by rotP
-    zip_lists = zip(p_list, chi2_list)
+    zip_lists = zip(p_list, chi2_list, dark_list)
     zip_sort = sorted(zip_lists)
-    p_list, chi2_list = zip(*zip_sort)
+    p_list, chi2_list, dark_list = zip(*zip_sort)
     # Normalize chi2 with the best value
     chi2_min = np.min(chi2_list)
     chi2_norm_list = [x/chi2_min for x in chi2_list]
@@ -123,11 +123,11 @@ def plot_chi2_rotP(out_period_scan, obj, dof, Psec=False, out="chi2_rotP.jpg"):
     # the analysis would be complex.
     P_cand, chi2_cand, chi2_3sigma = calc_confidence_chi2(p_list, chi2_list, dof)
     # Plot candidates
-    for idx, (p, c) in enumerate(zip(P_cand, chi2_cand)):
+    for idx, (p, c, d) in enumerate(zip(P_cand, chi2_cand, dark_list)):
         if Psec:
-            print(f"P_cand {idx} = {p:.5f} s (chi2 = {c:.5f})")
+            print(f"P_cand {idx} = {p:.5f} s (chi2 = {c:.5f}, darkfacet = {d:.2f})")
         else:
-            print(f"P_cand {idx} = {p:.5f} h (chi2 = {c:.5f})")
+            print(f"P_cand {idx} = {p:.5f} h (chi2 = {c:.5f}, darkfacet = {d:.2f})")
         if idx == 0:
             label = r"$\chi^2 <$" + f"{chi2_3sigma:.2f} (N={len(P_cand)})"
         else:
