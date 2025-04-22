@@ -3,10 +3,6 @@
 """Check number of observations.
 """
 from argparse import ArgumentParser as ap
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt  
-
 
 if __name__ == "__main__":
     parser = ap(description="Check number of observations.")
