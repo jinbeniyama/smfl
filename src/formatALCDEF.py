@@ -12,8 +12,6 @@ from argparse import ArgumentParser as ap
 from astroquery.jplhorizons import Horizons
 from astropy import units as u
 
-from smfl import calc_JPLephem
-
 
 def calc_ltday(obj, code, t_jd):
     """Calculate light traveling time in day.
