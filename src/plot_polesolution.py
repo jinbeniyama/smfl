@@ -27,39 +27,9 @@ from argparse import ArgumentParser as ap
 import numpy as np
 import matplotlib.pyplot as plt  
 import matplotlib
-from matplotlib.colors import LogNorm
 from scipy.interpolate import griddata
 
-from smfl import nobs_lc, golden_spiral_G10
-
-
-def chi2_CI(N=2, M=1, nu=None, sigma=3):
-    """
-    Calculate confidense interval (CI) of chi2 distribution.
-    
-    Parameters
-    ----------
-    N : int
-      number of observations
-    M : int
-      number of parameters in convex inv
-    nu : int, optional 
-      degree of freedom of chi2 distribution (N-M)
-    sigma : int
-      confidence level
-
-    Return
-    ------
-    CI : float
-      n-sigma confidence interval in percentage
-    """
-    if not nu:
-        nu = N - M
-    # For reduced chi2
-    CI = sigma*np.sqrt(2/nu)
-    ## For normal chi2
-    #CI = sigma*np.sqrt(2*nu)
-    return CI
+from smfl import nobs_lc, golden_spiral_G10, calc_CI_chi2
 
 
 if __name__ == "__main__":
@@ -158,8 +128,8 @@ if __name__ == "__main__":
     chi2_min = np.min(chi2_list)
     # See Fatka+2025
     # Assume nu = N - M ~ N (i.e., N >> M)
-    nu = args.dof
-    CI = chi2_CI(nu=nu, sigma=args.sigma)
+    dof = args.dof
+    CI = calc_CI_chi2(dof, sigma=args.sigma)
     print(f"{args.sigma}-sigma CI is {CI:.2f}")
 
     if norm:
