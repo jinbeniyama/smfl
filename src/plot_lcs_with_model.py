@@ -123,10 +123,6 @@ if __name__ == "__main__":
         for ax in fig.axes:
             ax.set_ylim([ymin, ymax])
 
-    ax2_2.set_xlabel("Rotational Phase")
-    ax2_2.set_ylabel("Relative flux")
-
-
     out = f"{args.obj}_lc{str_model}.png"
     plt.savefig(out, dpi=200)
     plt.close()
