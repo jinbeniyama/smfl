@@ -76,7 +76,9 @@ def plot_chi2_rotP(out_period_scan, obj, dof, Psec=False, out="chi2_rotP.jpg"):
     out : str, bool 
         output file name
     """
-
+    
+    plt.rcParams["xtick.labelsize"] = 12
+    plt.rcParams["ytick.labelsize"] = 12
     fig = plt.figure(figsize=(8, 6))
     ax = fig.add_axes([0.15, 0.15, 0.8, 0.80-0.05])
     # Margin for object name in title
@@ -141,7 +143,7 @@ def plot_chi2_rotP(out_period_scan, obj, dof, Psec=False, out="chi2_rotP.jpg"):
     ax.set_xlim([xmin, xmax])
     
     ax.legend()
-    ax.set_title(f"{obj} (dof={dof})")
+    ax.set_title(f"{obj}" +  r"($\nu$=" + f"{dof})")
     plt.savefig(out)
     plt.close()
 
