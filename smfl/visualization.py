@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import numpy as np
+import matplotlib.pyplot as plt  
 
 mymark = ["o", "^", "x", "D", "+", "v", "<", ">", "h", "H"]
 
@@ -69,7 +70,7 @@ def figure4lc(nline):
     return fig, axes
 
 
-def plot_lc_wmodel(df, JD0, ylim=None, out="lc.txt"):
+def plot_lc_wmodel(df, JD0, ylim=None, label=None, out="lc.txt"):
     """Plot lightcurves in a 3x3 grid.
 
     Parameters
@@ -80,6 +81,8 @@ def plot_lc_wmodel(df, JD0, ylim=None, out="lc.txt"):
         Zero Julian Day.
     ylim : tuple, optional
         y-axis limits.
+    label : array-like, optional
+        label
     out : str
         Output filename.
     """
@@ -97,14 +100,17 @@ def plot_lc_wmodel(df, JD0, ylim=None, out="lc.txt"):
         df_temp = df[df["n_lc"] == n_lc_list[idx]]
         ax.set_xlabel(f"JD-{JD0} [day]")
         ax.set_ylabel("Relative flux")
+        if label:
+            labelobs = f"Obs {label[idx]}"
+        else:
+            labelobs = f"Obs {idx+1}"
+        labelmod = f"Model"
         ax.scatter(
             df_temp["jd"] - JD0, df_temp["flux"],
-            color="black", label=f"LC {idx+1} obs", s=10,
-        )
+            color="black", label=labelobs, s=10)
         ax.scatter(
             df_temp["jd"] - JD0, df_temp["flux_model"],
-            marker="x", color="red", label=f"LC {idx+1} model"
-        )
+            marker="x", color="red", label=labelmod)
         ax.legend()
 
     if ylim:
@@ -117,7 +123,7 @@ def plot_lc_wmodel(df, JD0, ylim=None, out="lc.txt"):
     plt.close()
 
 
-def plot_plc_wmodel(df, JD0, rotP, Pishour, ylim=None, out="plc.png"):
+def plot_plc_wmodel(df, JD0, rotP, Pishour, ylim=None, label=None, out="plc.png"):
     """Plot phase lightcurves in a 3x3 grid.
 
     Parameters
@@ -132,6 +138,8 @@ def plot_plc_wmodel(df, JD0, rotP, Pishour, ylim=None, out="plc.png"):
         Whether rotation period is in hours
     ylim : tuple
         (ymin, ymax) for y-axis range
+    label : array-like, optional
+        label
     out : str
         Output filename
     """
@@ -157,10 +165,15 @@ def plot_plc_wmodel(df, JD0, rotP, Pishour, ylim=None, out="plc.png"):
         df_temp = df[df["n_lc"] == n_lc_list[idx]]
         ax.set_xlabel("Rotational Phase")
         ax.set_ylabel("Relative flux")
+        if label:
+            labelobs = f"Obs {label[idx]}"
+        else:
+            labelobs = f"Obs {idx+1}"
+        labelmod = f"Model"
         ax.scatter(
-            df_temp["phase"], df_temp["flux"], color="black", s=10, label=f"LC {idx+1}")
+            df_temp["phase"], df_temp["flux"], color="black", s=10, label=labelobs)
         ax.scatter(
-            df_temp["phase"], df_temp["flux_model"], marker="x", color="red", label=f"LC {idx+1} model")
+            df_temp["phase"], df_temp["flux_model"], marker="x", color="red", label=labelmod)
         ax.set_xlim([0.0, 1.0])
         ax.legend()
 
