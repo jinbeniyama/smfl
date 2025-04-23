@@ -89,6 +89,7 @@ if __name__ == "__main__":
     chi2_list = []
     rotP_list = []
     dfac_list = []
+    l_list, b_list = [], []
     for x in data:
         l, b = x[0], x[1]
         res = f"res_ci_{int(l)}_{int(b)}"
@@ -114,7 +115,7 @@ if __name__ == "__main__":
 
             # Extract rotP
             line = lines[2]
-            print(line)
+            #print(line)
             line = line.split(" ")
             rotP = line[-1].strip("\n")
             # hour to sec
@@ -128,8 +129,24 @@ if __name__ == "__main__":
             chi2_list.append(float(chi2))
             rotP_list.append(float(rotP))
             dfac_list.append(float(dfac))
+            l_list.append(float(l))
+            b_list.append(float(b))
 
-    chi2_min = np.min(chi2_list)
+    # Extract minimum chi-squared and relavant parameters
+    idx_min = np.argmin(chi2_list)
+    chi2_min = chi2_list[idx_min]
+    dfac_min = dfac_list[idx_min]
+    l_min = l_list[idx_min]
+    b_min = b_list[idx_min]
+    print(
+        f"Minimum chi-squared {chi2_min} w/\n"
+        f"  (lam, beta) = ({l_min}, {b_min}), darkfacet {dfac_min:.2f}%\n"
+        f"  (lam, beta) = ({int(l_min)}, {int(b_min)}), darkfacet {dfac_min:.2f}%")
+    print("")
+    info = (
+        f"Minimum chi-squared {chi2_min} w/\n"
+        f"  (lam, beta) = ({l_min:.1f}, {b_min:.1f}), darkfacet {dfac_min:.2f}%")
+
     # See Fatka+2025
     # Assume nu = N - M ~ N (i.e., N >> M)
     dof = args.dof
@@ -170,6 +187,8 @@ if __name__ == "__main__":
     #ax1 = fig.add_axes([0.15, 0.72, 0.63, 0.25], projection="mollweide")
     ax1 = fig.add_axes([0.15, 0.72, 0.63, 0.25])
     cax1 = fig.add_axes([0.80, 0.72, 0.03, 0.25])
+    # Add info.
+    ax1.text(0.05, 0.90, info, size=10, transform=ax1.transAxes)
 
     #ax2 = fig.add_axes([0.15, 0.40, 0.63, 0.25], projection="mollweide")
     ax2 = fig.add_axes([0.15, 0.40, 0.63, 0.25])
