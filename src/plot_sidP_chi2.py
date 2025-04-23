@@ -14,50 +14,7 @@ import numpy as np
 import matplotlib.pyplot as plt  
 
 from calcerror import round_error
-from smfl import plotstyle
-
-
-def calc_confidence_chi2(p_list, chi2_list, dof):
-    """Estimate rotation period and its error.
-
-    Parameters
-    ----------
-    p_list : array-like
-        list of rotation periods
-    chi2_list : array-like
-        corresponding chi2 values
-    dof : int
-        degrees of freedom
-    
-    Returns
-    -------
-    P_cand : array-like
-        rotation period with chi2 smaller than chi2_3sigma
-    chi2_cand : float
-        chi-squared values corresponding to P_cand
-    chi2_3sigma : float
-        chi-squared boundary with 3-sigma confidence level
-    """
-    
-    # Normalize chi2 with the best value
-    chi2_min = np.min(chi2_list)
-    chi2_norm_list = [x/chi2_min for x in chi2_list]
-
-    # 3-sigma like boundary
-    # confidence level of 0.9973
-    # Since chi2 min is normalized to the unity above,
-    # this boundary corresponds to those of Polishook 2014, Icarus, 241, 79 
-    # and Cambioni+2021, Nature.       
-    chi2_min_norm = np.min(chi2_norm_list)
-    chi2_3sigma = chi2_min_norm + 3*(2/dof)**0.5
-
-    # Search periods with chi2 values smaller than chi2_3sigma
-    P_cand, chi2_cand = [], []
-    for p, c in zip(p_list, chi2_norm_list):
-        if c < chi2_3sigma:
-            P_cand.append(p)
-            chi2_cand.append(c)
-    return P_cand, chi2_cand, chi2_3sigma
+from smfl import plotstyle, calc_confidence_chi2
 
 
 def plot_chi2_rotP(out_period_scan, obj, dof, Psec=False, out="chi2_rotP.jpg"):
@@ -245,8 +202,6 @@ def plot_chi2_rotP_MC(out_period_scan, obj, Psec=False, out="chi2_rotP_MC.jpg"):
     ax.set_title(f"{obj}")
     plt.savefig(out)
     plt.close()
-
-
 
 
 if __name__ == "__main__":
