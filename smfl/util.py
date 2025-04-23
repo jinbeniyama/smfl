@@ -563,3 +563,66 @@ def mean_angular_spacing(lon, lat):
     angular_dist_deg = np.rad2deg(angular_dist_rad)
 
     return np.mean(angular_dist_deg)
+
+
+def calc_CI_chi2(dof, sigma=3):
+    """Calculate confidense interval (CI) of chi2 distribution.
+    
+    Parameters
+    ----------
+    dof : int, optional 
+        degree of freedom of chi2 distribution (N-M)
+    sigma : int
+      confidence level
+
+    Return
+    ------
+    CI : float
+        n-sigma confidence interval in percentage
+    """
+    # For reduced chi2
+    CI = sigma*(2/dof)**0.5
+    return CI
+
+
+def calc_confidence_chi2(p_list, chi2_list, dof):
+    """Estimate rotation period and its error.
+
+    Parameters
+    ----------
+    p_list : array-like
+        list of rotation periods
+    chi2_list : array-like
+        corresponding chi2 values
+    dof : int
+        degrees of freedom
+    
+    Returns
+    -------
+    P_cand : array-like
+        rotation period with chi2 smaller than chi2_3sigma
+    chi2_cand : float
+        chi-squared values corresponding to P_cand
+    chi2_3sigma : float
+        chi-squared boundary with 3-sigma confidence level
+    """
+    
+    # Normalize chi2 with the best value
+    chi2_min = np.min(chi2_list)
+    chi2_norm_list = [x/chi2_min for x in chi2_list]
+
+    # 3-sigma like boundary
+    # confidence level of 0.9973
+    # Since chi2 min is normalized to the unity above,
+    # this boundary corresponds to those of Polishook 2014, Icarus, 241, 79 
+    # and Cambioni+2021, Nature.       
+    chi2_min_norm = np.min(chi2_norm_list)
+    chi2_3sigma = chi2_min_norm + 3*(2/dof)**0.5
+
+    # Search periods with chi2 values smaller than chi2_3sigma
+    P_cand, chi2_cand = [], []
+    for p, c in zip(p_list, chi2_norm_list):
+        if c < chi2_3sigma:
+            P_cand.append(p)
+            chi2_cand.append(c)
+    return P_cand, chi2_cand, chi2_3sigma
