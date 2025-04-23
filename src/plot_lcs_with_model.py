@@ -15,6 +15,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "obj", help="object name")
     parser.add_argument(
+        "--f_label", type=str, default=None,
+        help="File with labels")
+    parser.add_argument(
         "lc_phot", help="photometric light curve")
     parser.add_argument(
         "--lc_model", default=None,
@@ -41,6 +44,16 @@ if __name__ == "__main__":
     
     # Time zero point in Julian day
     JD0 = args.JD0
+
+    # Read label if exists
+    if args.f_label:
+        label = []
+        with open(args.f_label, "r") as f:
+            lines = f.readlines()
+            for line in lines:
+                label.append(line.strip("\n"))
+    else:
+        label = None
 
     # Read photometric result =================================================
     jd_phot, flux_phot, n_lc = [], [], []
@@ -89,9 +102,9 @@ if __name__ == "__main__":
         out = f"{args.obj}_lc{str_model}_{n+1}.png"
         n_lc_use = range(N_lc_per_fig*n+1, N_lc_per_fig*n+N_lc_per_fig+1, 1)
         df_n = df[df["n_lc"].isin(n_lc_use)]
-        plot_lc(df_n, JD0, args.ylim, out=out)
+        plot_lc(df_n, JD0, args.ylim, label=label, out=out)
         if args.rotP:
             print(f"     Phased lightcurves {n+1} ")
             out = f"{args.obj}_plc{str_model}_{n+1}.png"
-            plot_plc(df_n, JD0, args.rotP, args.hour, args.ylim, out=out)
+            plot_plc(df_n, JD0, args.rotP, args.hour, args.ylim, label=label, out=out)
     # Plot lightcurves ========================================================
