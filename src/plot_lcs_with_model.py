@@ -102,9 +102,10 @@ if __name__ == "__main__":
         out = f"{args.obj}_lc{str_model}_{n+1}.png"
         n_lc_use = range(N_lc_per_fig*n+1, N_lc_per_fig*n+N_lc_per_fig+1, 1)
         df_n = df[df["n_lc"].isin(n_lc_use)]
-        plot_lc(df_n, JD0, args.ylim, label=label, out=out)
+        label_n = label[N_lc_per_fig*n:N_lc_per_fig*(n+1)]
+        plot_lc_wmodel(df_n, JD0, args.ylim, label=label_n, out=out)
         if args.rotP:
             print(f"     Phased lightcurves {n+1} ")
             out = f"{args.obj}_plc{str_model}_{n+1}.png"
-            plot_plc(df_n, JD0, args.rotP, args.hour, args.ylim, label=label, out=out)
+            plot_plc_wmodel(df_n, JD0, args.rotP, args.hour, args.ylim, label=label_n, out=out)
     # Plot lightcurves ========================================================
