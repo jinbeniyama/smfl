@@ -7,112 +7,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt  
 
-from smfl import figure4lc
+from smfl import figure4lc, plot_lc_wmodel, plt_plc_wmodel
 
-
-def plot_lc(df, JD0, ylim=None, out="lc.txt"):
-    """Plot lightcurves in a 3x3 grid.
-
-    Parameters
-    ----------
-    df : pandas.DataFrame
-        Input dataframe.
-    JD0 : float
-        Zero Julian Day.
-    ylim : tuple, optional
-        y-axis limits.
-    out : str
-        Output filename.
-    """
-    df = df.reset_index(drop=True)
-    n_lc_list = list(set(df.n_lc))
-    
-    fig, axes = plt.subplots(3, 3, figsize=(15, 15))
-    axes = axes.flatten()
-
-    for idx, ax in enumerate(axes):
-        if idx >= len(n_lc_list):
-            ax.axis("off")  # Hide unused subplot
-            continue
-
-        df_temp = df[df["n_lc"] == n_lc_list[idx]]
-        ax.set_xlabel(f"JD-{JD0} [day]")
-        ax.set_ylabel("Relative flux")
-        ax.scatter(
-            df_temp["jd"] - JD0, df_temp["flux"],
-            color="black", label=f"LC {idx+1} obs", s=10,
-        )
-        ax.scatter(
-            df_temp["jd"] - JD0, df_temp["flux_model"],
-            marker="x", color="red", label=f"LC {idx+1} model"
-        )
-        ax.legend()
-
-    if ylim:
-        ymin, ymax = ylim
-        for ax in axes:
-            ax.set_ylim([ymin, ymax])
-
-    plt.tight_layout()
-    plt.savefig(out, dpi=200)
-    plt.close()
-
-
-def plot_plc(df, JD0, rotP, Pishour, ylim=None, out="plc.png"):
-    """Plot phase lightcurves in a 3x3 grid.
-
-    Parameters
-    ----------
-    df : pandas.DataFrame
-        input dataframe
-    JD0 : float
-        Zero Julian day
-    rotP : float
-        Rotation period (in hours if Pishour=True, else in seconds)
-    Pishour : bool
-        Whether rotation period is in hours
-    ylim : tuple
-        (ymin, ymax) for y-axis range
-    out : str
-        Output filename
-    """
-    import matplotlib.pyplot as plt
-
-    df = df.reset_index(drop=True)
-    n_lc_list = sorted(set(df.n_lc))  # sort for consistency
-
-    # Convert rotation period
-    rotP_sec = rotP * 3600. if Pishour else rotP
-    rotP_day = rotP_sec / 86400.
-
-    # Compute phase
-    df["phase"] = ((df["jd"] - JD0) / rotP_day) % 1
-
-    fig, axs = plt.subplots(3, 3, figsize=(15, 15))
-    axs = axs.flatten()
-
-    for idx, ax in enumerate(axs):
-        if idx >= len(n_lc_list):
-            ax.axis('off')  # Hide unused subplot
-            continue
-        df_temp = df[df["n_lc"] == n_lc_list[idx]]
-        ax.set_xlabel("Rotational Phase")
-        ax.set_ylabel("Relative flux")
-        ax.scatter(
-            df_temp["phase"], df_temp["flux"], color="black", s=10, label=f"LC {idx+1}")
-        ax.scatter(
-            df_temp["phase"], df_temp["flux_model"], marker="x", color="red", label=f"LC {idx+1} model")
-        ax.set_xlim([0.0, 1.0])
-        ax.legend()
-
-    if ylim:
-        ymin, ymax = ylim
-        for ax in axs:
-            ax.set_ylim([ymin, ymax])
-
-    plt.tight_layout()
-    plt.savefig(out, dpi=200)
-    plt.close()
 
 if __name__ == "__main__":
     parser = ap(description="Plot lightcurves")
@@ -142,7 +38,6 @@ if __name__ == "__main__":
         "--ylim", type=float, nargs=2, default=False,
         help="Y min and max")
     args = parser.parse_args()
-
     
     # Time zero point in Julian day
     JD0 = args.JD0
