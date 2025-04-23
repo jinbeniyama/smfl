@@ -53,6 +53,9 @@ if __name__ == "__main__":
         "--norm", action="store_true", default=False,
         help="Normalize chi2 by the minimum")
     parser.add_argument(
+        "--cmap", type=str, default="coolwarm",
+        help="Colormap")
+    parser.add_argument(
         "--outtype", type=str, default="png",
         help="format of output figures")
     parser.add_argument(
@@ -63,8 +66,9 @@ if __name__ == "__main__":
         help="Output finename")
     args = parser.parse_args()
  
-    # Color map
-    cm = "inferno"
+    # Examples of color map
+    ## "coolwarm", "inferno", "viridis", "cividis"
+    cm = args.cmap
     # Normalization
     norm = args.norm
 
