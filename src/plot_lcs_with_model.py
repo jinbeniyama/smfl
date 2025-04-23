@@ -5,9 +5,132 @@ Plot light curve with model curve.
 """
 from argparse import ArgumentParser as ap
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt  
 
 from smfl import figure4lc, mycolor
+
+
+def plot_lc(df, JD0, ylim=None, out="lc.txt"):
+    """Plot lightcurves.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        input dataframe
+    JD0 : float
+        Zero Julien day
+    out : str
+        output filename
+    """
+    df = df.reset_index(drop=True)
+    n_lc_list = list(set(df.n_lc))
+
+    fig = plt.figure(figsize=(15, 21)) 
+    ax1_1 = fig.add_axes([0.1, 0.80, 0.35, 0.18])
+    ax1_2 = fig.add_axes([0.6, 0.80, 0.35, 0.18])
+    ax2_1 = fig.add_axes([0.1, 0.55, 0.35, 0.18])
+    ax2_2 = fig.add_axes([0.6, 0.55, 0.35, 0.18])
+    ax3_1 = fig.add_axes([0.1, 0.30, 0.35, 0.18])
+    ax3_2 = fig.add_axes([0.6, 0.30, 0.35, 0.18])
+    ax4_1 = fig.add_axes([0.1, 0.05, 0.35, 0.18])
+    ax4_2 = fig.add_axes([0.6, 0.05, 0.35, 0.18])
+
+    for idx, ax in enumerate(
+        [ax1_1, ax1_2, ax2_1, ax2_2, ax3_1, ax3_2, ax4_1, ax4_2]):
+        if idx >= len(n_lc_list):
+            continue
+        ax.set_xlabel(f"JD-{JD0} [day]")
+        ax.set_ylabel("Relative flux")
+        df_temp = df[df["n_lc"]==n_lc_list[idx]]
+        ax.scatter(
+            df_temp["jd"]-JD0, df_temp["flux"], 
+            color=mycolor[1], label=f"LC {idx+1} obs")
+
+        ax.scatter(
+            df_temp["jd"]-JD0, df_temp["flux_model"], marker="x",
+            color=mycolor[0], label=f"LC {idx+1} model")
+        ax.legend()
+
+    # Use the same range
+    if ylim:
+        ymin, ymax = ylim
+        for ax in fig.axes:
+            ax.set_ylim([ymin, ymax])
+
+    plt.savefig(out, dpi=200)
+    plt.close()
+
+
+def plot_plc(df, JD0, rotP, Pishour, ylim=None, out="plc.txt"):
+    """Plot lightcurves.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        input dataframe
+    JD0 : float
+        Zero Julien day
+    rotP : float
+        rotation period
+    Pishour : bool
+        rotation period is in hour or not
+    ylim : array-like
+        ymin and ymax
+    out : str
+        output filename
+    """
+    df = df.reset_index(drop=True)
+    n_lc_list = list(set(df.n_lc))
+
+    fig = plt.figure(figsize=(15, 21)) 
+    ax1_1 = fig.add_axes([0.1, 0.80, 0.35, 0.18])
+    ax1_2 = fig.add_axes([0.6, 0.80, 0.35, 0.18])
+    ax2_1 = fig.add_axes([0.1, 0.55, 0.35, 0.18])
+    ax2_2 = fig.add_axes([0.6, 0.55, 0.35, 0.18])
+    ax3_1 = fig.add_axes([0.1, 0.30, 0.35, 0.18])
+    ax3_2 = fig.add_axes([0.6, 0.30, 0.35, 0.18])
+    ax4_1 = fig.add_axes([0.1, 0.05, 0.35, 0.18])
+    ax4_2 = fig.add_axes([0.6, 0.05, 0.35, 0.18])
+
+    if Pishour:
+        rotP_sec = rotP*3600.
+    else:
+        # rotP in sec
+        rotP_sec = rotP
+    # rotP in day
+    rotP_day = rotP_sec/24./3600.
+
+    df["phase"] = [((x-JD0)/rotP_day)%1 for x in df["jd"]]
+     
+    for idx, ax in enumerate(
+        [ax1_1, ax1_2, ax2_1, ax2_2, ax3_1, ax3_2, ax4_1, ax4_2]):
+        if idx >= len(n_lc_list):
+            continue
+        ax.set_xlabel("Rotational Phase")
+        ax.set_ylabel("Relative flux")
+        df_temp = df[df["n_lc"]==n_lc_list[idx]]
+        ax.scatter(
+            df_temp["phase"], df_temp["flux"], 
+            color=mycolor[1], label=f"LC {idx+1}")
+
+        ax.scatter(
+            df_temp["phase"], df_temp["flux_model"], marker="x",
+            color=mycolor[0], label=f"LC {idx+1} model")
+        ax.set_xlim([0.0, 1.0])
+        ax.legend()
+
+    ax2_2.set_xlabel("Rotational Phase")
+    ax2_2.set_ylabel("Relative flux")
+    # Use the same range
+    if ylim:
+        ymin, ymax = ylim
+        for ax in fig.axes:
+            ax.set_ylim([ymin, ymax])
+
+    # Plot lightcurves
+    plt.savefig(out, dpi=200)
+    plt.close()
 
 
 if __name__ == "__main__":
@@ -42,8 +165,6 @@ if __name__ == "__main__":
     
     # Time zero point in Julian day
     JD0 = args.JD0
-
-
 
     # Read photometric result =================================================
     jd_phot, flux_phot, n_lc = [], [], []
@@ -88,98 +209,18 @@ if __name__ == "__main__":
     if N_lc > 8:
         print("Only show 8 lightcurves.")
 
+    # Number of figures
+    N_fig = int(np.ceil(N_lc/8))
 
     # Plot lightcurves ========================================================
-    # Create 4x2 figures lightcurves
-    fig = plt.figure(figsize=(15, 21)) 
-    ax1_1 = fig.add_axes([0.1, 0.80, 0.35, 0.18])
-    ax1_2 = fig.add_axes([0.6, 0.80, 0.35, 0.18])
-    ax2_1 = fig.add_axes([0.1, 0.55, 0.35, 0.18])
-    ax2_2 = fig.add_axes([0.6, 0.55, 0.35, 0.18])
-    ax3_1 = fig.add_axes([0.1, 0.30, 0.35, 0.18])
-    ax3_2 = fig.add_axes([0.6, 0.30, 0.35, 0.18])
-    ax4_1 = fig.add_axes([0.1, 0.05, 0.35, 0.18])
-    ax4_2 = fig.add_axes([0.6, 0.05, 0.35, 0.18])
-
-     
-    for idx, ax in enumerate(
-        [ax1_1, ax1_2, ax2_1, ax2_2, ax3_1, ax3_2, ax4_1, ax4_2]):
-        ax.set_xlabel(f"JD-{JD0} [day]")
-        ax.set_ylabel("Relative flux")
-        df_temp = df[df["n_lc"]==idx+1]
-        ax.scatter(
-            df_temp["jd"]-JD0, df_temp["flux"], 
-            color=mycolor[1], label=f"LC {idx+1} obs")
-
-        if args.lc_model:
-            ax.scatter(
-                df_temp["jd"]-JD0, df_temp["flux_model"], marker="x",
-                color=mycolor[0], label=f"LC {idx+1} model")
-        ax.legend()
-
-    # Use the same range
-    if args.ylim:
-        ymin, ymax = args.ylim
-        for ax in fig.axes:
-            ax.set_ylim([ymin, ymax])
-
-    out = f"{args.obj}_lc{str_model}.png"
-    plt.savefig(out, dpi=200)
-    plt.close()
+    for n in range(N_fig):
+        print(f"Make Figure {n+1} ")
+        out = f"{args.obj}_lc{str_model}_{n+1}.png"
+        n_lc_use = range(8*n+1, 8*n+9, 1)
+        print(n_lc_use)
+        df_n = df[df["n_lc"].isin(n_lc_use)]
+        plot_lc(df_n, JD0, args.ylim, out=out)
+        if args.rotP:
+            out = f"{args.obj}_plc{str_model}_{n+1}.png"
+            plot_plc(df_n, JD0, args.rotP, args.hour, args.ylim, out=out)
     # Plot lightcurves ========================================================
-     
-
-    # Plot phased lightcurves =================================================
-    # Create 4x2 figures phased lightcurves
-    if args.rotP:
-        fig = plt.figure(figsize=(15, 21)) 
-        ax1_1 = fig.add_axes([0.1, 0.80, 0.35, 0.18])
-        ax1_2 = fig.add_axes([0.6, 0.80, 0.35, 0.18])
-        ax2_1 = fig.add_axes([0.1, 0.55, 0.35, 0.18])
-        ax2_2 = fig.add_axes([0.6, 0.55, 0.35, 0.18])
-        ax3_1 = fig.add_axes([0.1, 0.30, 0.35, 0.18])
-        ax3_2 = fig.add_axes([0.6, 0.30, 0.35, 0.18])
-        ax4_1 = fig.add_axes([0.1, 0.05, 0.35, 0.18])
-        ax4_2 = fig.add_axes([0.6, 0.05, 0.35, 0.18])
-
-        if args.hour:
-            rotP_sec = args.rotP*3600.
-        else:
-            # rotP in sec
-            rotP_sec = args.rotP
-        # rotP in day
-        rotP_day = rotP_sec/24./3600.
-
-        df["phase"] = [((x-JD0)/rotP_day)%1 for x in df["jd"]]
-         
-        for idx, ax in enumerate(
-            [ax1_1, ax1_2, ax2_1, ax2_2, ax3_1, ax3_2, ax4_1, ax4_2]):
-            ax.set_xlabel("Rotational Phase")
-            ax.set_ylabel("Relative flux")
-            df_temp = df[df["n_lc"]==idx+1]
-            ax.scatter(
-                df_temp["phase"], df_temp["flux"], 
-                color=mycolor[1], label=f"LC {idx+1}")
-
-            if args.lc_model:
-                ax.scatter(
-                    df_temp["phase"], df_temp["flux_model"], marker="x",
-                    color=mycolor[0], label=f"LC {idx+1} model")
-            ax.set_xlim([0.0, 1.0])
-            # Ignore outliers
-            #ax.set_ylim([0.5, 1.5])
-            ax.legend()
-
-        ax2_2.set_xlabel("Rotational Phase")
-        ax2_2.set_ylabel("Relative flux")
-        # Use the same range
-        if args.ylim:
-            ymin, ymax = args.ylim
-            for ax in fig.axes:
-                ax.set_ylim([ymin, ymax])
-
-        # Plot lightcurves
-        out = f"{args.obj}_plc{str_model}.png"
-        plt.savefig(out, dpi=200)
-        plt.close()
-    # Plot phased lightcurves =================================================
