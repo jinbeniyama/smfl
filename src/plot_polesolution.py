@@ -145,7 +145,7 @@ if __name__ == "__main__":
     print("")
     info = (
         f"Minimum chi-squared {chi2_min} w/\n"
-        f"  (lam, beta) = ({l_min:.1f}, {b_min:.1f}), darkfacet {dfac_min:.2f}%")
+        f"  (lam, beta) = ({int(l_min)}, {int(b_min)}), darkfacet {dfac_min:.2f}%")
 
     # See Fatka+2025
     # Assume nu = N - M ~ N (i.e., N >> M)
