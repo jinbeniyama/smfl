@@ -1,7 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Plot phase function (not so-called phase curve) used in DAMIT.
+"""Plot phase function (not so-called phase curve) used in DAMIT.
 
 References
 ----------
@@ -18,13 +17,12 @@ if __name__ == "__main__":
     args = parser.parse_args()
  
     fig = plt.figure(figsize=(8, 6))
-
     ax = fig.add_axes([0.15, 0.15, 0.75, 0.75])
     ax.set_xlabel("Phase angle [deg]")
     ax.set_ylabel("Relative brightness")
     
-
     # Different from phase curve in magnitude
+    # TODO: Convert the phase curve to mag and compare it with others (e.g., HG)
     # Default values
     #   A0, D, k = 0.5, 0.1, -0.5 (DAMIT document, convexinv_doc.pdf)
     A0_list = [0.5]
