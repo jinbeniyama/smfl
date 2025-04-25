@@ -23,12 +23,14 @@ condition is smaller than one.
   if the fit significantly improves when the dark facet is large, 
   it means that there is likely to be an albedo variation over the surface.
 
-- ISC (Iteration stop condition), 10 by default:
+- ISC (Iteration stop condition), 50 by default:
   If it is an integral number higher than one, 
   then it is the number of iteration steps in the Levenberg-Marquardt loop. 
   If it is lower than one, then it is the smallest difference in rms 
   deviation between two subsequent steps – when the steps have smaller 
   difference, the iteration loop is stopped.
+
+- MNI (Minimum number of iterations), 10 by default:
 
 Template
 --------
@@ -73,8 +75,11 @@ if __name__ == "__main__":
         "--CRW", type=float, default=0.1, 
         help="Convexity regularization weight")
     parser.add_argument(
-        "--ISC", type=float, default=10, 
+        "--ISC", type=float, default=50, 
         help="Iteration stop condition")
+    parser.add_argument(
+        "--MNI", type=int, default=10, 
+        help="Minimum number of iterations")
     parser.add_argument(
         "--out", type=str, default="input_ps",
         help="Output file name")
@@ -87,6 +92,7 @@ if __name__ == "__main__":
     M = args.ord_harmonics
     CRW = args.CRW
     ISC = args.ISC
+    MNI = args.MNI
 
     N_per = 2*args.dt_hr*(P1-P0)/P0/P1/eps
     print(f"Number of periods: N_per = {N_per:.1f}")
@@ -102,6 +108,6 @@ if __name__ == "__main__":
         f.write("0.1 0\n")
         f.write("-0.5 0\n")
         f.write("0.1 0\n")
-        f.write("50\n")
-        f.write(f"{ISC}")
+        f.write(f"{ISC}\n")
+        f.write(f"{MNI}")
         
