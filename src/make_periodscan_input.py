@@ -13,6 +13,23 @@ input par file. The last line gives the minimum number of iterations if the iter
 condition is smaller than one.
 
 
+- CRW (Convexity regularization weight), 0.1 by default:
+  This is often needed to keep the shape formally convex.
+  A typical value is 0.1, but it may often have to be orders of magnitude larger or smaller.
+  There is a dark facet area that makes the whole set of facets convex. 
+  Always try to put it below 1% of the total area by increasing the convexity 
+  regularization parameter. 
+  If you cannot get a good fit with a small dark area and 
+  if the fit significantly improves when the dark facet is large, 
+  it means that there is likely to be an albedo variation over the surface.
+
+- ISC (Iteration stop condition), 10 by default:
+  If it is an integral number higher than one, 
+  then it is the number of iteration steps in the Levenberg-Marquardt loop. 
+  If it is lower than one, then it is the smallest difference in rms 
+  deviation between two subsequent steps – when the steps have smaller 
+  difference, the iteration loop is stopped.
+
 Template
 --------
 0.0925 0.09277 0.1	period start - end - interval coeff.
@@ -53,6 +70,9 @@ if __name__ == "__main__":
         "--ord_harmonics", type=int, default=6, 
         help="Order of spherical harmonics")
     parser.add_argument(
+        "--ISC", type=float, default=10, 
+        help="Iteration stop condition")
+    parser.add_argument(
         "--out", type=str, default="input_ps",
         help="Output file name")
     args = parser.parse_args()
@@ -62,6 +82,7 @@ if __name__ == "__main__":
     eps = args.interval
     N = args.deg_harmonics
     M = args.ord_harmonics
+    ISC = args.ISC
 
     N_per = 2*args.dt_hr*(P1-P0)/P0/P1/eps
     print(f"Number of periods: N_per = {N_per:.1f}")
@@ -78,5 +99,5 @@ if __name__ == "__main__":
         f.write("-0.5 0\n")
         f.write("0.1 0\n")
         f.write("50\n")
-        f.write("10")
+        f.write(f"{ISC}")
         
