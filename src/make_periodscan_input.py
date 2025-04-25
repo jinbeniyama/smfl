@@ -70,6 +70,9 @@ if __name__ == "__main__":
         "--ord_harmonics", type=int, default=6, 
         help="Order of spherical harmonics")
     parser.add_argument(
+        "--CRW", type=float, default=0.1, 
+        help="Convexity regularization weight")
+    parser.add_argument(
         "--ISC", type=float, default=10, 
         help="Iteration stop condition")
     parser.add_argument(
@@ -82,6 +85,7 @@ if __name__ == "__main__":
     eps = args.interval
     N = args.deg_harmonics
     M = args.ord_harmonics
+    CRW = args.CRW
     ISC = args.ISC
 
     N_per = 2*args.dt_hr*(P1-P0)/P0/P1/eps
@@ -90,7 +94,7 @@ if __name__ == "__main__":
     with open(args.out, "w") as f:
         f.write(f"{P0} {P1} {eps} \n")
         # Convex weight
-        f.write(f"0.1 \n")
+        f.write(f"{CRW} \n")
         # Degree and order of spherical harmonics
         f.write(f"{N} {M}\n")
         f.write("8\n")
