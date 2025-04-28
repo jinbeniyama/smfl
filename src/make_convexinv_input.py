@@ -59,20 +59,23 @@ if __name__ == "__main__":
         "--N_golden", type=int, default=None, 
         help="Number of poles")
     parser.add_argument(
-        "-a", type=int, default=0.5, 
+        "-a", type=float, default=0.5, 
         help="phase funct. param a (amplitude)")
     parser.add_argument(
-        "-d", type=int, default=0.1, 
+        "-d", type=float, default=0.1, 
         help="phase funct. param d (width)")
     parser.add_argument(
-        "-k", type=int, default=-0.5, 
+        "-k", type=float, default=-0.5, 
         help="phase funct. param k (slope)")
     parser.add_argument(
-        "-c", type=int, default=0.1, 
+        "-c", type=float, default=0.1, 
         help="Lambert coefficient c")
     parser.add_argument(
-        "--Niter", type=int, default=50, 
-        help="number of iterations")
+        "--CRW", type=float, default=0.1, 
+        help="Convexity regularization weight")
+    parser.add_argument(
+        "--ISC", type=float, default=50, 
+        help="Iteration stop condition")
     parser.add_argument(
         "--fixP", action="store_true", default=False, 
         help="Fix sidereal period")
@@ -90,7 +93,8 @@ if __name__ == "__main__":
     outdir = args.inpdir
     os.makedirs(outdir, exist_ok=True)
 
-    Niter = args.Niter
+    CRW = args.CRW
+    ISC = args.ISC
     
     if args.lam:
         lam = [args.lam]
@@ -138,7 +142,7 @@ if __name__ == "__main__":
                 # Initial rotation angle
                 f.write(f"0\n")
                 # convexity regularization      
-                f.write(f"0.1\n")
+                f.write(f"{CRW}\n")
                 # degree and order of spherical harmonics expansion
                 f.write(f"6 6\n")
                 # number of rows        
@@ -152,7 +156,7 @@ if __name__ == "__main__":
                 # Lambert coefficient 'c' (0/1 - fixed/free)      
                 f.write(f"{args.c} 0\n")
                 # iteration stop condition
-                f.write(f"{Niter}")
+                f.write(f"{ISC}")
     else:
         for l in lam:
             for b in beta:
