@@ -84,8 +84,8 @@ do_convexinv.py --lcdir (directory of lc) --lc (lcs) --findir . --inpdir . --lam
 8. Convert model to stl and obj
 ```
 [model, output of the process 7.]
-model2stl.py (model)
-model2obj.py (model)
+model2stl.py (model) --out (model.stl)
+model2obj.py (model) --out (model.obj)
 ```
 
 9. Plot lightcurves with model curves.
