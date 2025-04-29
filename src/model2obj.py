@@ -32,7 +32,8 @@ def convert2obj(model, out):
             obj.write(f"v {x} {y} {z}\n")
         for f in faces:
             i, j, k = f.strip().split()
-            obj.write(f"f {int(i)+1} {int(j)+1} {int(k)+1}\n")
+            #obj.write(f"f {int(i)+1} {int(j)+1} {int(k)+1}\n")
+            obj.write(f"f {int(i)} {int(j)} {int(k)}\n")
 
 if __name__ == "__main__":
     parser = ap(description="Convert model to obj.")
