@@ -39,6 +39,9 @@ if __name__ == "__main__":
         "--lcdir", type=str, default=".", 
         help="lightcurve directory")
     parser.add_argument(
+        "--inp", type=str, default="input",
+        help="Input file of convexinv (for final modeling)")
+    parser.add_argument(
         "--inpdir", type=str, default="convex_input",
         help="Directory for input file of convexinv")
     parser.add_argument(
@@ -61,7 +64,8 @@ if __name__ == "__main__":
     if args.final:
         findir = args.findir
         os.makedirs(findir, exist_ok=True)
-        do_conv_final(args.lam, args.beta, lc, lcdir, inpdir=inpdir, outdir=findir)
+        #do_conv_final(args.lam, args.beta, lc, lcdir, inpdir=inpdir, outdir=findir)
+        do_conv_final(args.lam, args.beta, lc, lcdir, inp=args.inp, outdir=findir)
      
     else:
         resdir = args.resdir
