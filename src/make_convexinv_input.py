@@ -189,5 +189,5 @@ if __name__ == "__main__":
                     # Lambert coefficient 'c' (0/1 - fixed/free)      
                     f.write(f"{args.c} 0\n")
                     # iteration stop condition
-                    f.write(f"{Niter}")
+                    f.write(f"{ISC}")
                 
