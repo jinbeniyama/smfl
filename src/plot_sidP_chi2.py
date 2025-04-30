@@ -17,7 +17,7 @@ from calcerror import round_error
 from smfl import plotstyle, calc_confidence_chi2
 
 
-def plot_chi2_rotP(out_period_scan, obj, dof, Psec=False, out="chi2_rotP.jpg"):
+def plot_chi2_rotP(out_period_scan, obj, dof, sigma=3, Psec=False, out="chi2_rotP.jpg"):
     """Plot chi2 vs. rotP.
 
     Parameters
@@ -28,6 +28,8 @@ def plot_chi2_rotP(out_period_scan, obj, dof, Psec=False, out="chi2_rotP.jpg"):
         object name
     dof : int
         degrees of freedom
+    sigma : float
+        confidence level
     Psec : bool, optional
         whether the unit of rotation period is second
     out : str, bool 
@@ -71,6 +73,8 @@ def plot_chi2_rotP(out_period_scan, obj, dof, Psec=False, out="chi2_rotP.jpg"):
     p_list, chi2_list, dark_list = zip(*zip_sort)
     # Normalize chi2 with the best value
     chi2_min = np.min(chi2_list)
+    print(f"Original chi-squared minimum: {chi2_min:.4f}")
+
     chi2_norm_list = [x/chi2_min for x in chi2_list]
 
     ax.scatter(p_list, chi2_norm_list, s=30, color="black", marker="x")
@@ -80,7 +84,7 @@ def plot_chi2_rotP(out_period_scan, obj, dof, Psec=False, out="chi2_rotP.jpg"):
     # Obtain normalized chi2 list and 3-sigma boundary
     # If there are more than two candidates,
     # the analysis would be complex.
-    P_cand, chi2_cand, chi2_3sigma = calc_confidence_chi2(p_list, chi2_list, dof)
+    P_cand, chi2_cand, chi2_3sigma = calc_confidence_chi2(p_list, chi2_list, dof, sigma)
     # Plot candidates
     for idx, (p, c, d) in enumerate(zip(P_cand, chi2_cand, dark_list)):
         if Psec:
@@ -213,6 +217,9 @@ if __name__ == "__main__":
         "dof", type=int, 
         help="Degree of freedom")
     parser.add_argument(
+        "--sigma", type=float, default=3.0,
+        help="Confidence level")
+    parser.add_argument(
         "out_period_scan", nargs="*", 
         help="output file of period_scan")
     parser.add_argument(
@@ -229,4 +236,4 @@ if __name__ == "__main__":
     if N_mc > 1:
         plot_chi2_rotP_MC(args.out_period_scan, args.obj, args.sec, out=args.out)
     else:
-        plot_chi2_rotP(args.out_period_scan, args.obj, args.dof, args.sec, out=args.out)
+        plot_chi2_rotP(args.out_period_scan, args.obj, args.dof, args.sigma, args.sec, out=args.out)
