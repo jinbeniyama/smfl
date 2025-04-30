@@ -58,7 +58,7 @@ if __name__ == "__main__":
     if args.final:
         findir = args.findir
         os.makedirs(findir, exist_ok=True)
-        do_conv_final(lc, lcdir, inp=args.inp, outdir=findir)
+        do_conv_final(lc, inp=args.inp, outdir=findir)
      
     else:
         resdir = args.resdir

@@ -332,7 +332,7 @@ def do_conv(lam, beta, lc, lcdir=".", inpdir=".", outdir="."):
     subprocess.run(cmd, shell=True)
 
 
-def do_conv_final(lc, lcdir=".", inp="input.txt", outdir="."):
+def do_conv_final(lc, inp="input.txt", outdir="."):
     """
     Do convex inversion.
     All results are saved in outdir.
@@ -341,8 +341,6 @@ def do_conv_final(lc, lcdir=".", inp="input.txt", outdir="."):
     ----------
     lc : str
       lightcurve
-    lcdir : str
-      directory for lc, optional
     inpdir : str
       directory for input file, optional
     outdir : str
@@ -356,7 +354,7 @@ def do_conv_final(lc, lcdir=".", inp="input.txt", outdir="."):
     outpara = f"outpara_{common_str}"
 
     cmd = (
-        f"cat {lcdir}/{lc} | convexinv -s -p {outdir}/{outpara} {inp} {outdir}/{outlc} "
+        f"cat {lc} | convexinv -s -p {outdir}/{outpara} {inp} {outdir}/{outlc} "
         f"| minkowski | standardtri > {outdir}/{model}"
         )
     print(f"Execute\n  {cmd}")
