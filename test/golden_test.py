@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """Test of Golden spiral algorithm.
 """
+from argparse import ArgumentParser as ap
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.spatial import cKDTree
@@ -100,12 +101,12 @@ def mean_angular_spacing(lon, lat):
     return np.mean(angular_dist_deg)
 
 
-def plot_on_mollweide(lam_deg, beta_deg):
+def plot_on_mollweide(lam_deg, beta_deg, out="out.png"):
     """Mollweide.
     """
     plt.figure(figsize=(8, 4.5))
     ax = plt.subplot(111)
-    ax.scatter(lam_deg, beta_deg, s=5, color='darkblue')
+    ax.scatter(lam_deg, beta_deg, s=5, color='black', label=f"N={len(lam_deg)}")
 
     #ax = plt.subplot(111, projection="mollweide")
     #lam_rad = np.radians(lam_deg)
@@ -113,22 +114,25 @@ def plot_on_mollweide(lam_deg, beta_deg):
     #ax.scatter(lam_rad, beta_rad, s=5, color='darkblue')
 
     ax.grid(True)
-    ax.set_xlabel(r"$\lambda$ [rad]")
-    ax.set_ylabel(r"$\beta$ [rad]")
+    ax.set_xlabel(r"$\lambda$ [deg]")
+    ax.set_ylabel(r"$\beta$ [deg]")
+    ax.legend()
     plt.tight_layout()
-    plt.show()
+    plt.savefig(out)
 
 
 if __name__ == "__main__":
-    N = 2000
+    parser = ap(description="Plot poles with the Golden Spiral algorithm.")
+    parser.add_argument(
+        "N", type=int,
+        help="Plot 2N+1 poles.")
+    args = parser.parse_args()
 
-    # N points
-    #lam, beta = golden_spiral_spherical(N)
+    N = args.N
     
     # 2N + 1 points
     lam, beta = golden_spiral_G10(N)
     wid = mean_angular_spacing(lam, beta)
     print(f"width = {wid:.2f}")
-
-    plot_on_mollweide(lam, beta)
-
+    out = f"goldenspiran_{N}.png"
+    plot_on_mollweide(lam, beta, out)
