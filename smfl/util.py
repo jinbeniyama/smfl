@@ -228,6 +228,80 @@ def format4inv(df, jpleph, key_jd):
     return df
 
 
+def format4inv_query(df, key_jd, target, code="500"):
+    """Format lightcurves for convex inversion.
+
+    Parameters
+    ----------
+    df : str
+        dataframe of lightcurve 
+    key_jd : str
+        keyword of time in JD
+    code : str
+        IAU observatory code
+
+    Return
+    ------
+    df_format : pandas.DataFrame
+        formatted data
+    """
+    x_S_list, y_S_list, z_S_list = [], [], []
+    x_E_list, y_E_list, z_E_list = [], [], []
+    
+    # 1. Query vectors with JD and mpc code
+    # 2. Query (ra and dec) with JD and mpc code
+    #    Then convert it to vectors
+    for idx_r, row in df.iterrows():
+        jd = row["jd"]
+        ast = Horizons(location=code, id=target, epochs=jd)
+        eph = ast.ephemerides()
+        lam, beta, r   = eph["EclLon"], eph["EclLat"], eph["r"]
+        ra, dec, delta = eph["RA"], eph["DEC"], eph["delta"]
+        
+
+        ## use cartisian method
+        c_eclip = SkyCoord(
+            lam, beta, r, frame="heliocentricmeanecliptic", 
+            unit=(u.deg, u.deg, u.au)
+            )
+        c_eclip = c_eclip.cartesian
+
+        x_sun = -c_eclip.x.value
+        y_sun = -c_eclip.y.value
+        z_sun = -c_eclip.z.value
+
+        # not icrs (), but gcrs(Geocentric Celestial Reference System)
+        c_radec = SkyCoord(
+            ra=ra, dec=dec, distance=delta, frame="gcrs", unit=(u.hourangle, u.deg, u.au),
+        )
+        c_radec_car = c_radec.cartesian
+        #print("radec cartesian")
+        #print(f"{c_radec_car.x}, {c_radec_car.y}, {c_radec_car.z}")
+
+        c_g_eclip_mean = c_radec.transform_to(
+            astropy.coordinates.builtin_frames.GeocentricMeanEcliptic)
+        c_g_eclip_mean = c_g_eclip_mean.cartesian
+        x_earth = -c_g_eclip_mean.x.value
+        y_earth = -c_g_eclip_mean.y.value
+        z_earth = -c_g_eclip_mean.z.value
+
+        x_S_list.append(x_sun)
+        y_S_list.append(y_sun)
+        z_S_list.append(z_sun)
+        x_E_list.append(x_earth)
+        y_E_list.append(y_earth)
+        z_E_list.append(z_earth)
+
+    # predict x, y, z of the Sun and the Earth 
+    df["x_sun"]   = x_S_list
+    df["y_sun"]   = y_S_list
+    df["z_sun"]   = z_S_list
+    df["x_earth"] = x_E_list
+    df["y_earth"] = y_E_list
+    df["z_earth"] = z_E_list
+    return df
+
+
 def save4inv(
     result, absflux, random, key_jd, key_flux, key_fluxerr, out):
     """
