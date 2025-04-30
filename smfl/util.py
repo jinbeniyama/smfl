@@ -332,18 +332,13 @@ def do_conv(lam, beta, lc, lcdir=".", inpdir=".", outdir="."):
     subprocess.run(cmd, shell=True)
 
 
-#def do_conv_final(lam, beta, lc, lcdir=".", inpdir=".", outdir="."):
-def do_conv_final(lam, beta, lc, lcdir=".", inp="input.txt", outdir="."):
+def do_conv_final(lc, lcdir=".", inp="input.txt", outdir="."):
     """
     Do convex inversion.
     All results are saved in outdir.
 
     Parameters
     ----------
-    lam : float
-      longitude
-    beta : float
-      latitude
     lc : str
       lightcurve
     lcdir : str
@@ -353,14 +348,6 @@ def do_conv_final(lam, beta, lc, lcdir=".", inp="input.txt", outdir="."):
     outdir : str
       directory for output file, optional
     """
-    l = lam
-    b = beta
-    print(f"  (lam, beta) = ({l:.1f}, {b:.1f})")
-
-    #inp = f"input_ci_{int(l)}_{int(b)}"
-    #model = f"model_ci_{int(l)}_{int(b)}"
-    #outlc = f"outlcs_ci_{int(l)}_{int(b)}"
-    #outpara = f"outpara_{int(l)}_{int(b)}"
 
     # Assume the filename is like inp_X_Y
     common_str = inp[4:]

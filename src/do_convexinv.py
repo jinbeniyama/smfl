@@ -15,12 +15,6 @@ from smfl import do_conv, do_conv_final, golden_spiral_G10
 if __name__ == "__main__":
     parser = ap(description="Do convexinversion.")
     parser.add_argument(
-        "--lam", type=float, default=None, 
-        help="ecliptic longitude")
-    parser.add_argument(
-        "--beta", type=float, default=None, 
-        help="ecliptic latitude")
-    parser.add_argument(
         "--Nlam", type=int, default=1, 
         help="number of ecliptic longitude")
     parser.add_argument(
@@ -64,8 +58,7 @@ if __name__ == "__main__":
     if args.final:
         findir = args.findir
         os.makedirs(findir, exist_ok=True)
-        #do_conv_final(args.lam, args.beta, lc, lcdir, inpdir=inpdir, outdir=findir)
-        do_conv_final(args.lam, args.beta, lc, lcdir, inp=args.inp, outdir=findir)
+        do_conv_final(lc, lcdir, inp=args.inp, outdir=findir)
      
     else:
         resdir = args.resdir
