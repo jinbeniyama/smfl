@@ -175,7 +175,7 @@ if __name__ == "__main__":
                     # Initial rotation angle
                     f.write(f"0\n")
                     # convexity regularization      
-                    f.write(f"0.1\n")
+                    f.write(f"{CRW}\n")
                     # degree and order of spherical harmonics expansion
                     f.write(f"6 6\n")
                     # number of rows        
@@ -190,4 +190,3 @@ if __name__ == "__main__":
                     f.write(f"{args.c} 0\n")
                     # iteration stop condition
                     f.write(f"{ISC}")
-                
