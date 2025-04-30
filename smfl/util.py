@@ -73,8 +73,7 @@ def Ariadnetestdata():
 
 
 def format4inv(df, jpleph, key_jd):
-    """
-    Format lightcurves for convex inversion.
+    """Format lightcurves for convex inversion.
 
     jpleph should be queried by hand using columns 1,2,18,19,20.
     # ToDo: lc and jpleph should be array-like 
@@ -117,8 +116,7 @@ def format4inv(df, jpleph, key_jd):
           other = [x.replace("\n", "") for x in other]
           other = [x for x in other if x != ""]
 
-
-          ## Checl!
+          ## Check!
           if len(other)!=18:
               continue
 
