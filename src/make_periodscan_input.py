@@ -81,6 +81,18 @@ if __name__ == "__main__":
         "--MNI", type=int, default=10, 
         help="Minimum number of iterations")
     parser.add_argument(
+        "-a", type=float, default=0.5, 
+        help="phase funct. param a (amplitude)")
+    parser.add_argument(
+        "-d", type=float, default=0.1, 
+        help="phase funct. param d (width)")
+    parser.add_argument(
+        "-k", type=float, default=-0.5, 
+        help="phase funct. param k (slope)")
+    parser.add_argument(
+        "-c", type=float, default=0.1, 
+        help="Lambert coefficient c")
+    parser.add_argument(
         "--out", type=str, default="input_ps",
         help="Output file name")
     args = parser.parse_args()
@@ -104,10 +116,10 @@ if __name__ == "__main__":
         # Degree and order of spherical harmonics
         f.write(f"{N} {M}\n")
         f.write("8\n")
-        f.write("0.5 0\n")
-        f.write("0.1 0\n")
-        f.write("-0.5 0\n")
-        f.write("0.1 0\n")
+        f.write(f"{args.a} 0\n")
+        f.write(f"{args.d} 0\n")
+        f.write(f"{args.k} 0\n")
+        f.write(f"{args.c} 0\n")
         f.write(f"{ISC}\n")
         f.write(f"{MNI}")
         
