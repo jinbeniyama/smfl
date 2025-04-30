@@ -30,14 +30,23 @@ import numpy as np
 import pandas as pd
 from argparse import ArgumentParser as ap
 
-from smfl import format4inv, Ariadnetestdata, save4inv, calc_JPLephem, tbinning
+from smfl import format4inv, format4inv_query, Ariadnetestdata, save4inv, calc_JPLephem, tbinning
 
 
 if __name__ == "__main__":
     parser = ap(description="Fotmat lightcurves for convex inversion.")
     parser.add_argument(
+        "target", type=str,
+        help="Target name")
+    parser.add_argument(
         "--res", nargs="*",
         help="Results of light curve observation")
+    parser.add_argument(
+        "--code", nargs="*",
+        help="IAU observatory code")
+    parser.add_argument(
+        "--samecode", action="store_true", default=False,
+        help="Whether ALL observations are from the same observatory")
     parser.add_argument(
         "--jpl", nargs="*",
         help="JPL/HORIZONS result")
@@ -68,68 +77,122 @@ if __name__ == "__main__":
     parser.add_argument(
         "--test", action="store_true", default=False, 
         help="Test for Ariadne")
+    parser.add_argument(
+        "--before202504", action="store_true", default=False, 
+        help="Old version before 202504.")
     args = parser.parse_args()
-   
-  
-    # Test
-    # Need JPL ephemeris before this script.
-    if args.test:
-        # Save Ariadnetestdata
-        df_phot = Ariadnetestdata()
-        csv_Ariadne = "Ariadnetest_data.csv"
-        df_phot.to_csv(csv_Ariadne, sep=" ", index=False)
-  
-        # Save Ariadne JPL ephemeris
-        # date0, date1 = "1965-05-01", "1965-05-02"
-        # step, code = "1m", "381"
-        # eph = calc_JPLephem("Ariadne", date0, date1, step, code)
-        # jpl_Ariadne = "Ariadnetestephem.csv"
-        # eph.write(jpl_Ariadne, format="pandas.csv", sep=" ")
-  
-        # Save Ariadne JPL ephemeris by hand
-        # Leiden Station, Johannesburg (observatory) [code: 081]3 
-        # Reference : vanHouten-Groeneveld et al. 1979
-        jpl_Ariadne = "Ariadnetest_jpl.csv"
+    
 
-        df_phot = format4inv(csv_Ariadne, jpl_Ariadne, args.key_jd)
-        out = f"test_Ariadne"
-        save4inv(
-            [df_phot], args.absflux, random, args.key_jd, args.key_flux,
-            args.key_fluxerr, out)
-        sys.exit()
-  
-    assert len(args.res)==len(args.jpl), "phot/jpl res should be the same dim"
-  
-    result = []
-    # Extract object info
-    for csv,jpl in zip(args.res, args.jpl):
-        df_phot = pd.read_csv(csv, sep=" ")
-        # Binning with time
-        if args.tbin:
-            df_phot = tbinning(
-                df_phot, args.tbin, key_t=args.key_jd, unit_t="d", 
-                key_flux=args.key_flux, key_fluxerr=args.key_fluxerr)
-      
-        df_phot = format4inv(df_phot, jpl, args.key_jd)
-        result.append(df_phot)
-  
-    # Set seed 
-    seed = 0
-    np.random.seed(seed)
-  
-    # If n_mc > 0, save N_mc outputs with Monte Carlo technique
-    for n_mc in range(args.N_mc):
-        if args.N_mc == 1:
-            out = args.out
+    # This is new version
+    if not args.before202504:
+        
+        N_lc = len(args.res)
+        print(f"Number of lightcurves = {N_lc}")
+        if args.samecode:
+            code_list = [args.code[0] for n in range(N_lc)]
         else:
-            out = f"{args.out}_{n_mc+1:04d}"
-        print(f"  N_mc : {n_mc+1}, output : {out}")
+            code_list = args.code
+            N_code = len(code_list)
+            print(f"Number of code = {N_code}")
+            print("")
+            assert N_code == N_lc, "Check lcs and codes."
+
+
+        result = []
+        # Extract object info
+        for fi, co in zip(args.res, code_list):
+            df_phot = pd.read_csv(fi, sep=" ")
+            # Binning with time
+            if args.tbin:
+                df_phot = tbinning(
+                    df_phot, args.tbin, key_t=args.key_jd, unit_t="d", 
+                    key_flux=args.key_flux, key_fluxerr=args.key_fluxerr)
+            # Yes, no need to download JPL ephemerides by hand!
+            df_phot = format4inv_query(df_phot, args.key_jd, args.target, co)
+            result.append(df_phot)
+        # Set seed 
+        seed = 0
+        np.random.seed(seed)
   
-        # Output results
-        if n_mc > 0:
-            random = True
-        else:
-            random = False
-        save4inv(
-            result, args.absflux, random, args.key_jd, args.key_flux,
-            args.key_fluxerr, out)
+        # If n_mc > 0, save N_mc outputs with Monte Carlo technique
+        for n_mc in range(args.N_mc):
+            if args.N_mc == 1:
+                out = args.out
+            else:
+                out = f"{args.out}_{n_mc+1:04d}"
+            print(f"  N_mc : {n_mc+1}, output : {out}")
+  
+            # Output results
+            if n_mc > 0:
+                random = True
+            else:
+                random = False
+            save4inv(
+                result, args.absflux, random, args.key_jd, args.key_flux,
+                args.key_fluxerr, out)
+    
+
+    # This is annoying because we should download jpl files by hand......
+    else:
+        # Test
+        # Need JPL ephemeris before this script.
+        if args.test:
+            # Save Ariadnetestdata
+            df_phot = Ariadnetestdata()
+            csv_Ariadne = "Ariadnetest_data.csv"
+            df_phot.to_csv(csv_Ariadne, sep=" ", index=False)
+  
+            # Save Ariadne JPL ephemeris
+            # date0, date1 = "1965-05-01", "1965-05-02"
+            # step, code = "1m", "381"
+            # eph = calc_JPLephem("Ariadne", date0, date1, step, code)
+            # jpl_Ariadne = "Ariadnetestephem.csv"
+            # eph.write(jpl_Ariadne, format="pandas.csv", sep=" ")
+  
+            # Save Ariadne JPL ephemeris by hand
+            # Leiden Station, Johannesburg (observatory) [code: 081]3 
+            # Reference : vanHouten-Groeneveld et al. 1979
+            jpl_Ariadne = "Ariadnetest_jpl.csv"
+
+            df_phot = format4inv(csv_Ariadne, jpl_Ariadne, args.key_jd)
+            out = f"test_Ariadne"
+            save4inv(
+                [df_phot], args.absflux, random, args.key_jd, args.key_flux,
+                args.key_fluxerr, out)
+            sys.exit()
+  
+        assert len(args.res)==len(args.jpl), "phot/jpl res should be the same dim"
+  
+        result = []
+        # Extract object info
+        for csv,jpl in zip(args.res, args.jpl):
+            df_phot = pd.read_csv(csv, sep=" ")
+            # Binning with time
+            if args.tbin:
+                df_phot = tbinning(
+                    df_phot, args.tbin, key_t=args.key_jd, unit_t="d", 
+                    key_flux=args.key_flux, key_fluxerr=args.key_fluxerr)
+          
+            df_phot = format4inv(df_phot, jpl, args.key_jd)
+            result.append(df_phot)
+  
+        # Set seed 
+        seed = 0
+        np.random.seed(seed)
+  
+        # If n_mc > 0, save N_mc outputs with Monte Carlo technique
+        for n_mc in range(args.N_mc):
+            if args.N_mc == 1:
+                out = args.out
+            else:
+                out = f"{args.out}_{n_mc+1:04d}"
+            print(f"  N_mc : {n_mc+1}, output : {out}")
+  
+            # Output results
+            if n_mc > 0:
+                random = True
+            else:
+                random = False
+            save4inv(
+                result, args.absflux, random, args.key_jd, args.key_flux,
+                args.key_fluxerr, out)
