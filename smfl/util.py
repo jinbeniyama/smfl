@@ -332,7 +332,8 @@ def do_conv(lam, beta, lc, lcdir=".", inpdir=".", outdir="."):
     subprocess.run(cmd, shell=True)
 
 
-def do_conv_final(lam, beta, lc, lcdir=".", inpdir=".", outdir="."):
+#def do_conv_final(lam, beta, lc, lcdir=".", inpdir=".", outdir="."):
+def do_conv_final(lam, beta, lc, lcdir=".", inp="input.txt", outdir="."):
     """
     Do convex inversion.
     All results are saved in outdir.
@@ -356,13 +357,19 @@ def do_conv_final(lam, beta, lc, lcdir=".", inpdir=".", outdir="."):
     b = beta
     print(f"  (lam, beta) = ({l:.1f}, {b:.1f})")
 
-    inp = f"input_ci_{int(l)}_{int(b)}"
-    model = f"model_ci_{int(l)}_{int(b)}"
-    outlc = f"outlcs_ci_{int(l)}_{int(b)}"
-    outpara = f"outpara_{int(l)}_{int(b)}"
+    #inp = f"input_ci_{int(l)}_{int(b)}"
+    #model = f"model_ci_{int(l)}_{int(b)}"
+    #outlc = f"outlcs_ci_{int(l)}_{int(b)}"
+    #outpara = f"outpara_{int(l)}_{int(b)}"
+
+    # Assume the filename is like inp_X_Y
+    common_str = inp[4:]
+    model = f"model_{common_str}"
+    outlc = f"outlcs_{common_str}"
+    outpara = f"outpara_{common_str}"
 
     cmd = (
-        f"cat {lcdir}/{lc} | convexinv -s -p {outdir}/{outpara} {inpdir}/{inp} {outdir}/{outlc} "
+        f"cat {lcdir}/{lc} | convexinv -s -p {outdir}/{outpara} {inp} {outdir}/{outlc} "
         f"| minkowski | standardtri > {outdir}/{model}"
         )
     print(f"Execute\n  {cmd}")
@@ -585,7 +592,7 @@ def calc_CI_chi2(dof, sigma=3):
     return CI
 
 
-def calc_confidence_chi2(p_list, chi2_list, dof):
+def calc_confidence_chi2(p_list, chi2_list, dof, sigma):
     """Estimate rotation period and its error.
 
     Parameters
@@ -596,6 +603,8 @@ def calc_confidence_chi2(p_list, chi2_list, dof):
         corresponding chi2 values
     dof : int
         degrees of freedom
+    sigma : float
+        confidence level
     
     Returns
     -------
@@ -603,26 +612,26 @@ def calc_confidence_chi2(p_list, chi2_list, dof):
         rotation period with chi2 smaller than chi2_3sigma
     chi2_cand : float
         chi-squared values corresponding to P_cand
-    chi2_3sigma : float
-        chi-squared boundary with 3-sigma confidence level
+    chi2_nsigma : float
+        chi-squared boundary with n-sigma confidence level
     """
     
     # Normalize chi2 with the best value
     chi2_min = np.min(chi2_list)
     chi2_norm_list = [x/chi2_min for x in chi2_list]
 
-    # 3-sigma like boundary
+    # n-sigma like boundary
     # confidence level of 0.9973
     # Since chi2 min is normalized to the unity above,
     # this boundary corresponds to those of Polishook 2014, Icarus, 241, 79 
     # and Cambioni+2021, Nature.       
     chi2_min_norm = np.min(chi2_norm_list)
-    chi2_3sigma = chi2_min_norm + 3*(2/dof)**0.5
+    chi2_nsigma = chi2_min_norm + sigma*(2/dof)**0.5
 
     # Search periods with chi2 values smaller than chi2_3sigma
     P_cand, chi2_cand = [], []
     for p, c in zip(p_list, chi2_norm_list):
-        if c < chi2_3sigma:
+        if c < chi2_nsigma:
             P_cand.append(p)
             chi2_cand.append(c)
-    return P_cand, chi2_cand, chi2_3sigma
+    return P_cand, chi2_cand, chi2_nsigma
