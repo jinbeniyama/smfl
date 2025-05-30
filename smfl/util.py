@@ -255,7 +255,20 @@ def format4inv_query(df, key_jd, target, code="500"):
     """
     x_S_list, y_S_list, z_S_list = [], [], []
     x_E_list, y_E_list, z_E_list = [], [], []
+
+    # FOr observatory not registered ==========================================
+    if code == "Seimei":
+        # Slightly different from 371
+        code = {
+            "lon":        133.5967,
+            "lat":         34.5769,
+            "elevation" :   0.355
+            }
+    else:
+        pass
+    # FOr observatory not registered ==========================================
     
+
     # 1. Query vectors with JD and mpc code
     for idx_r, row in df.iterrows():
         jd = row[key_jd]
