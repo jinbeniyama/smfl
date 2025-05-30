@@ -225,7 +225,6 @@ def format4inv(df, jpleph, key_jd):
 
     # predict x, y, z of the Sun and the Earth 
     df["x_sun"]   = df[key_jd].map(f_sun_x)
-    assert False, df["x_sun"]
     df["y_sun"]   = df[key_jd].map(f_sun_y)
     df["z_sun"]   = df[key_jd].map(f_sun_z)
     df["x_earth"] = df[key_jd].map(f_earth_x)
@@ -234,7 +233,7 @@ def format4inv(df, jpleph, key_jd):
     return df
 
 
-def format4inv_query(df, key_jd, target, code="500"):
+def format4inv_query(df, key_jd, target, code="500", chunk_size=50):
     """Format lightcurves for convex inversion.
 
     Parameters
@@ -247,16 +246,16 @@ def format4inv_query(df, key_jd, target, code="500"):
         target of interest
     code : str
         IAU observatory code
+    chunk_size : int
+        number of data to be queried at the same time
 
     Return
     ------
     df_format : pandas.DataFrame
         formatted data
     """
-    x_S_list, y_S_list, z_S_list = [], [], []
-    x_E_list, y_E_list, z_E_list = [], [], []
 
-    # FOr observatory not registered ==========================================
+    # For observatory not registered ==========================================
     if code == "Seimei":
         # Slightly different from 371
         code = {
@@ -266,86 +265,109 @@ def format4inv_query(df, key_jd, target, code="500"):
             }
     else:
         pass
-    # FOr observatory not registered ==========================================
-    
+    # For observatory not registered ==========================================
 
-    # 1. Query vectors with JD and mpc code
-    for idx_r, row in df.iterrows():
-        jd = row[key_jd]
+    jd_list = df[key_jd].tolist()
+    x_S_all, y_S_all, z_S_all = [], [], []
+    x_E_all, y_E_all, z_E_all = [], [], []
 
-        # Method 1. ===========================================================
-        # Use vectors
-        S = Horizons(location="500@10", id=target, epochs=jd)
-        vec = S.vectors(refplane="ecliptic")
-        # Vector from the Sun to asteroid (Sun -> ast)
-        x_S, y_S, z_S = vec["x"][0], vec["y"][0], vec["z"][0]
-        # Vector from asteroid to the Sun (ast -> Sun)
-        x_sun, y_sun, z_sun = -x_S, -y_S, -z_S
+    for i in range(0, len(jd_list), chunk_size):
+        jd_chunk = jd_list[i:i+chunk_size]
 
-        # Location of code means observer center
-        E = Horizons(location=code, id=target, epochs=jd)
-        vec = E.vectors(refplane="ecliptic")
-        eph = E.ephemerides()
+        vec_sun = Horizons(
+            location="500@10", id=target, epochs=jd_chunk).vectors(refplane="ecliptic")
+        x_S_all.extend(-vec_sun["x"].data)
+        y_S_all.extend(-vec_sun["y"].data)
+        z_S_all.extend(-vec_sun["z"].data)
 
-        # Vector from the Earth to asteroid (Earth -> ast)
-        x_E, y_E, z_E = vec["x"][0], vec["y"][0], vec["z"][0]
-        # Vector from asteroid to the Earth (ast -> Earth)
-        # Vector from asteroid to the Earth (ast -> Earth)
-        x_earth, y_earth, z_earth = -x_E, -y_E, -z_E
-        # Method 1. ===========================================================
-        
+        vec_earth = Horizons(
+            location=code, id=target, epochs=jd_chunk).vectors(refplane="ecliptic")
+        x_E_all.extend(-vec_earth["x"].data)
+        y_E_all.extend(-vec_earth["y"].data)
+        z_E_all.extend(-vec_earth["z"].data)
 
-        # Method 2. ===========================================================
-        # Query (lam, beta, r, ra, dec, delta) with JD and mpc code, then convert them to vectors.
-        # The results are identical to the results using the old "format4conv" function,
-        # while those are a bit diffent from Method 1.
-        # Also the method 1 seems smarter in terms of programming.
-        # ast = Horizons(location=code, id=target, epochs=jd)
-        # eph = ast.ephemerides()
-        # lam, beta, r   = eph["EclLon"], eph["EclLat"], eph["r"]
-        # ra, dec, delta = eph["RA"], eph["DEC"], eph["delta"]
+    df["x_sun"]   = x_S_all
+    df["y_sun"]   = y_S_all
+    df["z_sun"]   = z_S_all
+    df["x_earth"] = x_E_all
+    df["y_earth"] = y_E_all
+    df["z_earth"] = z_E_all
 
-        # ## use cartisian method
-        # c_eclip = SkyCoord(
-        #     lam, beta, r, frame="heliocentricmeanecliptic", 
-        #     unit=(u.deg, u.deg, u.au)
-        #     )
-        # c_eclip = c_eclip.cartesian
+    ## 1. Query vectors with JD and mpc code
+    #for idx_r, row in df.iterrows():
+    #    jd = row[key_jd]
 
-        # x_sun = -c_eclip.x.value[0]
-        # y_sun = -c_eclip.y.value[0]
-        # z_sun = -c_eclip.z.value[0]
+    #    # Method 1. ===========================================================
+    #    # Use vectors
+    #    S = Horizons(location="500@10", id=target, epochs=jd)
+    #    vec = S.vectors(refplane="ecliptic")
+    #    # Vector from the Sun to asteroid (Sun -> ast)
+    #    x_S, y_S, z_S = vec["x"][0], vec["y"][0], vec["z"][0]
+    #    # Vector from asteroid to the Sun (ast -> Sun)
+    #    x_sun, y_sun, z_sun = -x_S, -y_S, -z_S
 
-        # # not icrs (), but gcrs(Geocentric Celestial Reference System)
-        # c_radec = SkyCoord(
-        #     ra=ra, dec=dec, distance=delta, frame="gcrs", unit=(u.hourangle, u.deg, u.au),
-        # )
-        # c_radec_car = c_radec.cartesian
-        # #print("radec cartesian")
-        # #print(f"{c_radec_car.x}, {c_radec_car.y}, {c_radec_car.z}")
+    #    # Location of code means observer center
+    #    E = Horizons(location=code, id=target, epochs=jd)
+    #    vec = E.vectors(refplane="ecliptic")
+    #    eph = E.ephemerides()
 
-        # c_g_eclip_mean = c_radec.transform_to(
-        #     astropy.coordinates.builtin_frames.GeocentricMeanEcliptic)
-        # c_g_eclip_mean = c_g_eclip_mean.cartesian
-        # x_earth = -c_g_eclip_mean.x.value[0]
-        # y_earth = -c_g_eclip_mean.y.value[0]
-        # z_earth = -c_g_eclip_mean.z.value[0]
-        # Method 2. ===========================================================
+    #    # Vector from the Earth to asteroid (Earth -> ast)
+    #    x_E, y_E, z_E = vec["x"][0], vec["y"][0], vec["z"][0]
+    #    # Vector from asteroid to the Earth (ast -> Earth)
+    #    x_earth, y_earth, z_earth = -x_E, -y_E, -z_E
+    #    # Method 1. ===========================================================
 
-        x_S_list.append(x_sun)
-        y_S_list.append(y_sun)
-        z_S_list.append(z_sun)
-        x_E_list.append(x_earth)
-        y_E_list.append(y_earth)
-        z_E_list.append(z_earth)
+    #    # Method 2. ===========================================================
+    #    # Query (lam, beta, r, ra, dec, delta) with JD and mpc code, then convert them to vectors.
+    #    # The results are identical to the results using the old "format4conv" function,
+    #    # while those are a bit diffent from Method 1.
+    #    # Also the method 1 seems smarter in terms of programming.
+    #    # ast = Horizons(location=code, id=target, epochs=jd)
+    #    # eph = ast.ephemerides()
+    #    # lam, beta, r   = eph["EclLon"], eph["EclLat"], eph["r"]
+    #    # ra, dec, delta = eph["RA"], eph["DEC"], eph["delta"]
 
-    # predict x, y, z of the Sun and the Earth 
-    df["x_sun"]   = x_S_list
-    df["y_sun"]   = y_S_list
-    df["z_sun"]   = z_S_list
-    df["x_earth"] = x_E_list
-    df["y_earth"] = y_E_list
-    df["z_earth"] = z_E_list
+    #    # ## use cartisian method
+    #    # c_eclip = SkyCoord(
+    #    #     lam, beta, r, frame="heliocentricmeanecliptic", 
+    #    #     unit=(u.deg, u.deg, u.au)
+    #    #     )
+    #    # c_eclip = c_eclip.cartesian
+
+    #    # x_sun = -c_eclip.x.value[0]
+    #    # y_sun = -c_eclip.y.value[0]
+    #    # z_sun = -c_eclip.z.value[0]
+
+    #    # # not icrs (), but gcrs(Geocentric Celestial Reference System)
+    #    # c_radec = SkyCoord(
+    #    #     ra=ra, dec=dec, distance=delta, frame="gcrs", unit=(u.hourangle, u.deg, u.au),
+    #    # )
+    #    # c_radec_car = c_radec.cartesian
+    #    # #print("radec cartesian")
+    #    # #print(f"{c_radec_car.x}, {c_radec_car.y}, {c_radec_car.z}")
+
+    #    # c_g_eclip_mean = c_radec.transform_to(
+    #    #     astropy.coordinates.builtin_frames.GeocentricMeanEcliptic)
+    #    # c_g_eclip_mean = c_g_eclip_mean.cartesian
+    #    # x_earth = -c_g_eclip_mean.x.value[0]
+    #    # y_earth = -c_g_eclip_mean.y.value[0]
+    #    # z_earth = -c_g_eclip_mean.z.value[0]
+    #    # Method 2. ===========================================================
+
+    #    x_S_list.append(x_sun)
+    #    y_S_list.append(y_sun)
+    #    z_S_list.append(z_sun)
+    #    x_E_list.append(x_earth)
+    #    y_E_list.append(y_earth)
+    #    z_E_list.append(z_earth)
+
+    ## predict x, y, z of the Sun and the Earth 
+    #df["x_sun"]   = x_S_list
+    #df["y_sun"]   = y_S_list
+    #df["z_sun"]   = z_S_list
+    #df["x_earth"] = x_E_list
+    #df["y_earth"] = y_E_list
+    #df["z_earth"] = z_E_list
     return df
 
 
