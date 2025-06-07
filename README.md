@@ -78,7 +78,7 @@ From this plot, we constrain pole orientation. Again, there are several ways to 
 7. Create model with fixed period and pole
 ```
 make_convexinv_input.py --sidP  (rotation period) --lam (longitude) --beta (latitude) --fixpole --fixP
-do_convexinv.py --lcdir (directory of lc) --lc (lcs) --findir . --inpdir . --lam 259 --beta 84 --final
+do_convexinv.py --lc (lcs) --findir . --inpdir . --final
 ```
 
 8. Convert model to stl and obj
