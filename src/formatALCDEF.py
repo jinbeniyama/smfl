@@ -160,8 +160,8 @@ if __name__ == "__main__":
     # Do light-time correction
     df["t_jd_ltcor"] = df["jd"] - df["lt_day"]
     
-    out = f"{args.out}.txt"
-    df.to_csv(out, sep=" ", index=False)
+    out = f"{args.out}.csv"
+    df.to_csv(out, sep=",", index=False)
 
     # Save separately 
     if len(set(nobs_list)) > 1:
@@ -172,5 +172,5 @@ if __name__ == "__main__":
                 df_temp = df_temp[df_temp["flux_cor"] < args.f_max]
             if args.snr_min:
                 df_temp = df_temp[df_temp["flux_cor"]/df_temp["fluxerr_cor"] > args.snr_min]
-            out = f"{args.out}_{fname}.txt"
-            df_temp.to_csv(out, sep=" ", index=False)
+            out = f"{args.out}_{fname}.csv"
+            df_temp.to_csv(out, sep=",", index=False)
