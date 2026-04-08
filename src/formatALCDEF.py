@@ -55,6 +55,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--snr_min", type=float, default=False,
         help="Minimum SNR to be saved")
+    parser.add_argument(
+        "--lt_th_s", type=float, default=0.2,
+        help="Acceptable light-time difference in a session")
     args = parser.parse_args()
    
 
@@ -68,7 +71,7 @@ if __name__ == "__main__":
     sec2day = 24.*3600.
     # If lt_day (light traveling time in day) is smaller than this threhold,
     # the mean lt_day is used to perform light traveling time correction.
-    lt_th_s = 0.2
+    lt_th_s = args.lt_th_s
 
     obj = args.obj
 
@@ -148,13 +151,14 @@ if __name__ == "__main__":
     out = f"{args.out}.txt"
     df.to_csv(out, sep=" ", index=False)
 
-    # Save separately
-    for nobs, fname in zip(sorted(list(set(nobs_list))), sdate_list):
-        df_temp = df[df["n_obs"] == nobs]
-        # Remove outliers
-        if args.f_max:
-            df_temp = df_temp[df_temp["flux_cor"] < args.f_max]
-        if args.snr_min:
-            df_temp = df_temp[df_temp["flux_cor"]/df_temp["fluxerr_cor"] > args.snr_min]
-        out = f"{args.out}_{fname}.txt"
-        df_temp.to_csv(out, sep=" ", index=False)
+    # Save separately 
+    if len(set(nobs_list)) > 1:
+        for nobs, fname in zip(sorted(list(set(nobs_list))), sdate_list):
+            df_temp = df[df["n_obs"] == nobs]
+            # Remove outliers
+            if args.f_max:
+                df_temp = df_temp[df_temp["flux_cor"] < args.f_max]
+            if args.snr_min:
+                df_temp = df_temp[df_temp["flux_cor"]/df_temp["fluxerr_cor"] > args.snr_min]
+            out = f"{args.out}_{fname}.txt"
+            df_temp.to_csv(out, sep=" ", index=False)
