@@ -41,6 +41,9 @@ def calc_ltday(obj, code, t_jd):
 if __name__ == "__main__":
     parser = ap(description="Fotmat lightcurves from ALCDEF")
     parser.add_argument(
+        "obj", type=str,
+        help="Object name for light-time correction")
+    parser.add_argument(
         "lc", type=str,
         help="Input from ALCDEF")
     parser.add_argument(
@@ -66,6 +69,8 @@ if __name__ == "__main__":
     # If lt_day (light traveling time in day) is smaller than this threhold,
     # the mean lt_day is used to perform light traveling time correction.
     lt_th_s = 0.2
+
+    obj = args.obj
 
 
     jd_list, mag_list, magerr_list = [], [], []
@@ -123,15 +128,15 @@ if __name__ == "__main__":
         # Lighttime correction
         t_jd0 = np.min(df_temp["jd"])
         t_jd1 = np.max(df_temp["jd"])
-        lt_day0 = calc_ltday("2015 BY310", code, t_jd0)
-        lt_day1 = calc_ltday("2015 BY310", code, t_jd1)
+        lt_day0 = calc_ltday(obj, code, t_jd0)
+        lt_day1 = calc_ltday(obj, code, t_jd1)
         print(f"lt_day0: {lt_day0:.2f} d = {lt_day0*24.:.2f} hr = {lt_day0*24.*3600.:.2f} s")
         print(f"lt_day1: {lt_day1:.2f} d = {lt_day1*24.:.2f} hr = {lt_day1*24.*3600.:.2f} s")
         lt_s = (lt_day1 - lt_day0)*24.*3600.
         assert lt_s < lt_th_s
         
         t_jd_mean = (t_jd0 + t_jd1)/2.
-        lt_day_mean = calc_ltday("2015 BY310", code, t_jd_mean)
+        lt_day_mean = calc_ltday(obj, code, t_jd_mean)
         df_temp["lt_day"] = lt_day_mean
         df_list.append(df_temp)
 
