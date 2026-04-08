@@ -50,6 +50,9 @@ if __name__ == "__main__":
         "out", type=str,
         help="output filename wo/ extension")
     parser.add_argument(
+        "--normalize", action="store_true", default=False,
+        help="Normalize mag and flux")
+    parser.add_argument(
         "--f_max", type=float, default=False,
         help="Maximum flux to be saved")
     parser.add_argument(
@@ -110,10 +113,18 @@ if __name__ == "__main__":
                 l_sp = l.split("=")
                 code = l_sp[1].replace("\n", "")
                 print(f"MPCCODE: {code} (n_obs={n_obs})")
+            elif l[0:7] == "MAGBAND":
+                l_sp = l.split("=")
+                band = l_sp[1].replace("\n", "")
+                print(f"MAGBAND: {band} (n_obs={n_obs})")
             else:
                 pass
 
     df = pd.DataFrame({"jd": jd_list, "mag":mag_list, "magerr":magerr_list, "n_obs": nobs_list})
+
+    # Add band and code
+    df["band"] = band
+    df["loc"] = code
 
     df_list = []
     key_mag, key_magerr = "mag", "magerr"
@@ -122,11 +133,12 @@ if __name__ == "__main__":
         df_temp = df[df["n_obs"] == nobs]
 
         # Set mean mag to 0
-        df_temp[key_mag] = df_temp[key_mag] - np.mean(df_temp[key_mag])
-        # F    = 10**(-0.4*mag)
-        # Ferr = 0.4*log_e(10)*F*magerr
-        df_temp["flux_cor"] = 10**(-0.4*df_temp[key_mag])
-        df_temp["fluxerr_cor"] = 0.4*np.log(10)*df_temp["flux_cor"]*df_temp[key_magerr]
+        if args.normalize:
+            df_temp[key_mag] = df_temp[key_mag] - np.mean(df_temp[key_mag])
+            # F    = 10**(-0.4*mag)
+            # Ferr = 0.4*log_e(10)*F*magerr
+            df_temp["flux_cor"] = 10**(-0.4*df_temp[key_mag])
+            df_temp["fluxerr_cor"] = 0.4*np.log(10)*df_temp["flux_cor"]*df_temp[key_magerr]
 
         # Lighttime correction
         t_jd0 = np.min(df_temp["jd"])
