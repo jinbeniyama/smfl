@@ -10,6 +10,17 @@ All what needed in this script is a text file with
 After procedures 1 to 8, shape model can be created with an arbitrary software.
 This repository optimizes the public code in [DAMIT](https://astro.troja.mff.cuni.cz/projects/damit/).
 
+## Installing
+First clone the repository:
+```
+git clone (this-repo)
+```
+
+Run the following command to install with `pip`:
+```
+pip install (path-to-movphot)
+```
+
 
 ## Procedures
 1. Format lightcurves with aspect data from JPL ephemerides.
