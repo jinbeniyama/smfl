@@ -32,7 +32,7 @@ from argparse import ArgumentParser as ap
 
 from smfl import format4inv, format4inv_query, Ariadnetestdata, save4inv, calc_JPLephem, tbinning
 
-def get_args()
+def get_args():
     parser = ap(description="Fotmat lightcurves for convex inversion.")
     parser.add_argument(
         "target", type=str,
