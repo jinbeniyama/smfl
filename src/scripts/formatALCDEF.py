@@ -38,7 +38,7 @@ def calc_ltday(obj, code, t_jd):
     return lt_day
 
 
-if __name__ == "__main__":
+def get_args():
     parser = ap(description="Fotmat lightcurves from ALCDEF")
     parser.add_argument(
         "obj", type=str,
@@ -61,8 +61,12 @@ if __name__ == "__main__":
     parser.add_argument(
         "--lt_th_s", type=float, default=0.2,
         help="Acceptable light-time difference in a session")
-    args = parser.parse_args()
+    return parser.parse_args()
    
+
+def main(args=None):
+    if args == None:
+        args = get_args()
 
     # For light-time correction
     # Light speed 3e5 km/s
