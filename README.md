@@ -18,7 +18,7 @@ git clone (this-repo)
 
 Run the following command to install with `pip`:
 ```
-pip install (path-to-movphot)
+pip install (path-to-smfl)
 ```
 
 
