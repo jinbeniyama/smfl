@@ -69,6 +69,9 @@ if __name__ == "__main__":
         "--tbin", type=float, default=None, 
         help="width of time bin")
     parser.add_argument(
+        "--sep", type=str, default=",", 
+        help="Separator")
+    parser.add_argument(
         "--unit_t", default="s", 
         help="Unit of time for binning")
     parser.add_argument(
@@ -101,7 +104,7 @@ if __name__ == "__main__":
         result = []
         # Extract object info
         for fi, co in zip(args.res, code_list):
-            df_phot = pd.read_csv(fi, sep=" ")
+            df_phot = pd.read_csv(fi, sep=f"{args.sep}")
             # Binning with time
             if args.tbin:
                 df_phot = tbinning(
@@ -166,7 +169,7 @@ if __name__ == "__main__":
         result = []
         # Extract object info
         for csv,jpl in zip(args.res, args.jpl):
-            df_phot = pd.read_csv(csv, sep=" ")
+            df_phot = pd.read_csv(csv, sep=f"{args.sep}")
             # Binning with time
             if args.tbin:
                 df_phot = tbinning(
