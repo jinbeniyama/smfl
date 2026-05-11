@@ -30,7 +30,7 @@ import numpy as np
 import pandas as pd
 from argparse import ArgumentParser as ap
 
-from smfl import format4inv, format4inv_query, Ariadnetestdata, save4inv, calc_JPLephem, tbinning
+from smfl.util import format4inv, format4inv_query, Ariadnetestdata, save4inv, calc_JPLephem, tbinning
 
 def get_args():
     parser = ap(description="Fotmat lightcurves for convex inversion.")

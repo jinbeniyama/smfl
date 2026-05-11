@@ -1,0 +1,4 @@
+[console_scripts]
+format4convexinv = scripts.format4convexinv:main
+formatALCDEF = scripts.formatALCDEF:main
+mag2flux = scripts.mag2flux:main
