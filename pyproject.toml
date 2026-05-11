@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "smfl"
+version = "0.0.1"
+description = "Shape Modeling From Lightcurves"
+readme = "README.md"
+requires-python = ">=3.9"
+
+authors = [
+  {name = "Jin BENIYAMA", email = "jinbeniyama@gmail.com"}
+]
+
+license = {text = "MIT"}
+
+dependencies = [
+  "numpy",
+  "scipy",
+  "matplotlib",
+  "pandas",
+  "astropy",
+  "astroquery",
+  "astroscrappy",
+  "scikit-learn",
+  "scikit-image",
+]
+
+[project.scripts]
+formatALCDEF = "smfl.scripts.formatALCDEF:main"
+mag2flux = "smfl.scripts.mag2flux:main"
+format4convexinv = "smfl.scripts.format4convexinv:main"
+
+[project.urls]
+Homepage = "https://github.com/jinbeniyama/smfl"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
