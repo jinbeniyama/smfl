@@ -26,10 +26,10 @@ pip install (path-to-smfl)
 1. Format lightcurves with aspect data from JPL ephemerides.
 ```
 [for periodic analysis with MC technique]
-format4convexinv.py (lc1) --jpl (jpl1) --N_mc (N) --obj (obj) --out (lcs_all)
+format4convexinv (lc1) --jpl (jpl1) --N_mc (N) --obj (obj) --out (lcs_all)
 
 [for shape modeling]
-format4convexinv.py (lc1) (lc2) (lc3) --jpl (jpl1) (jpl2) (jpl3) --obj (obj) --out (lcs_all)
+format4convexinv (lc1) (lc2) (lc3) --jpl (jpl1) (jpl2) (jpl3) --obj (obj) --out (lcs_all)
 ```
 
 2. Search sidereal period with period_scan.
