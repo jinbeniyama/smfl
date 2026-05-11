@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 
 
-if __name__ == "__main__":
+def get_args():
     parser = ap(description="Convert magnitude to flux")
     parser.add_argument(
         "res", type=str,
@@ -36,8 +36,12 @@ if __name__ == "__main__":
     parser.add_argument(
         "--out", default="cor_lc.txt", 
         help="output filename")
-    args = parser.parse_args()
-    
+    return parser.parse_args()
+
+
+def main(args=None):
+    if args == None:
+        args = get_args()
     key_jd = args.key_jd
     key_mag = args.key_mag
     key_magerr = args.key_magerr
@@ -46,7 +50,7 @@ if __name__ == "__main__":
 
     df = pd.read_csv(args.res, sep=f"{args.sep}")
     assert set([key_jd, key_mag, key_magerr]) <= set(df.columns.tolist())
-    
+
     # Set mean mag to 0
     df[key_mag] = df[key_mag] - np.mean(df[key_mag])
     # F    = 10**(-0.4*mag)
@@ -55,3 +59,8 @@ if __name__ == "__main__":
     df["fluxerr_cor"] = 0.4*np.log(10)*df["flux_cor"]*df[key_magerr]
 
     df.to_csv(args.out, sep=f"{args.sep}")
+
+
+if __name__ == "__main__":
+    main()
+

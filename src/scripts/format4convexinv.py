@@ -32,8 +32,7 @@ from argparse import ArgumentParser as ap
 
 from smfl import format4inv, format4inv_query, Ariadnetestdata, save4inv, calc_JPLephem, tbinning
 
-
-if __name__ == "__main__":
+def get_args()
     parser = ap(description="Fotmat lightcurves for convex inversion.")
     parser.add_argument(
         "target", type=str,
@@ -83,8 +82,12 @@ if __name__ == "__main__":
     parser.add_argument(
         "--before202504", action="store_true", default=False, 
         help="Old version before 202504.")
-    args = parser.parse_args()
+    return parser.parse_args()
     
+
+def main(args=None):
+    if args == None:
+        args = get_args()
 
     # This is new version
     if not args.before202504:
@@ -199,3 +202,6 @@ if __name__ == "__main__":
             save4inv(
                 result, args.absflux, random, args.key_jd, args.key_flux,
                 args.key_fluxerr, out)
+
+if __name__ == "__main__":
+    main()
