@@ -31,6 +31,9 @@ if __name__ == "__main__":
         "--key_magerr", default="magerr", 
         help="Keyword of magnitude uncertainty")
     parser.add_argument(
+        "--sep", type=str, default=",", 
+        help="Separator")
+    parser.add_argument(
         "--out", default="cor_lc.txt", 
         help="output filename")
     args = parser.parse_args()
@@ -41,7 +44,7 @@ if __name__ == "__main__":
     key_flux = args.key_flux
     key_fluxerr = args.key_fluxerr
 
-    df = pd.read_csv(args.res, sep=" ")
+    df = pd.read_csv(args.res, sep=f"{args.sep}")
     assert set([key_jd, key_mag, key_magerr]) <= set(df.columns.tolist())
     
     # Set mean mag to 0
@@ -51,4 +54,4 @@ if __name__ == "__main__":
     df["flux_cor"] = 10**(-0.4*df[key_mag])
     df["fluxerr_cor"] = 0.4*np.log(10)*df["flux_cor"]*df[key_magerr]
 
-    df.to_csv(args.out, sep=" ")
+    df.to_csv(args.out, sep=f"{args.sep}")
