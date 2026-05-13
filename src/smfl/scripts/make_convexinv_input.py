@@ -38,7 +38,7 @@ import numpy as np
 
 from smfl import golden_spiral_G10, mean_angular_spacing
 
-if __name__ == "__main__":
+def get_args():
     parser = ap(description="Create input of convexinv with arbitary settings")
     parser.add_argument(
         "--sidP", type=float, default=0, 
@@ -88,8 +88,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "--out", type=str, default=False,
         help="Output file name")
-    args = parser.parse_args()
-   
+    return parser.parse_args()
+
+
+def main(args=None):
+    if args == None:
+        args = get_args()
+
     outdir = args.inpdir
     os.makedirs(outdir, exist_ok=True)
 
@@ -190,3 +195,6 @@ if __name__ == "__main__":
                     f.write(f"{args.c} 0\n")
                     # iteration stop condition
                     f.write(f"{ISC}")
+
+if __name__ == "__main__":
+    main()

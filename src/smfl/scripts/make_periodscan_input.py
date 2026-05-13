@@ -50,8 +50,7 @@ import os
 from argparse import ArgumentParser as ap
 import numpy as np
 
-
-if __name__ == "__main__":
+def get_args():
     parser = ap(description="Create input of convexinv with arbitary settings")
     parser.add_argument(
         "--P0_hr", type=float, default=0, 
@@ -95,7 +94,12 @@ if __name__ == "__main__":
     parser.add_argument(
         "--out", type=str, default="input_ps",
         help="Output file name")
-    args = parser.parse_args()
+    return parser.parse_args()
+
+
+def main(args=None):
+    if args == None:
+        args = get_args()
    
     P0 = args.P0_hr
     P1 = args.P1_hr
@@ -122,4 +126,6 @@ if __name__ == "__main__":
         f.write(f"{args.c} 0\n")
         f.write(f"{ISC}\n")
         f.write(f"{MNI}")
-        
+
+if __name__ == "__main__":
+    main()
