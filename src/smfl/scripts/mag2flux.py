@@ -31,6 +31,9 @@ def get_args():
         "--key_magerr", default="magerr", 
         help="Keyword of magnitude uncertainty")
     parser.add_argument(
+        "--key_jd_out", default="t_jd_ltcor", 
+        help="Keyword of time in JD in output file")
+    parser.add_argument(
         "--sep", type=str, default=",", 
         help="Separator")
     parser.add_argument(
@@ -47,6 +50,7 @@ def main(args=None):
     key_magerr = args.key_magerr
     key_flux = args.key_flux
     key_fluxerr = args.key_fluxerr
+    key_jd_out = args.key_jd_out
 
     df = pd.read_csv(args.res, sep=f"{args.sep}")
     assert set([key_jd, key_mag, key_magerr]) <= set(df.columns.tolist())
@@ -57,6 +61,11 @@ def main(args=None):
     # Ferr = 0.4*log_e(10)*F*magerr
     df["flux_cor"] = 10**(-0.4*df[key_mag])
     df["fluxerr_cor"] = 0.4*np.log(10)*df["flux_cor"]*df[key_magerr]
+
+    # Rename 
+    if key_jd != key_jd_out:
+        print(f"Time column is updated from {key_jd} to {key_jd_out}")
+        df = df.rename(columns={key_jd: key_jd_out})
 
     df.to_csv(args.out, sep=f"{args.sep}")
 
