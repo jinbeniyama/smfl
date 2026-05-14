@@ -33,6 +33,12 @@ format4convexinv (lc1) (lc2) (lc3) --jpl (jpl1) (jpl2) (jpl3) --obj (obj) --out 
 ```
 
 2. Search sidereal period with period_scan.
+Make input file for `period_scan` with a following command:
+```
+cat (lc) | period_scan -v (input_ps) (out_ps)
+make_periodscan_input --P0_hr (minimum period in hr) --P1_hr (maximum period in hr) --dt_hr (observation arc in hr) --deg_harmonics (degree of spherical harmonics) --ord_harmonics (order of spherical harmonics) --CRW (Convexity regularization weight) --ISC (Iteration stop condition) --interval (Interval coefficient) --out (output file)
+```
+
 The result of `period_scan` is saved in the current directory.
 Previously I used a Python wrapper to search a sidereal period, but I realized that just doing `cat lc | period_scan ...` is easier.
 ```
