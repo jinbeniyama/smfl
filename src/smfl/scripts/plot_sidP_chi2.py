@@ -13,7 +13,6 @@ from argparse import ArgumentParser as ap
 import numpy as np
 import matplotlib.pyplot as plt  
 
-from calcerror import round_error
 from smfl import plotstyle, calc_confidence_chi2
 
 
@@ -183,12 +182,10 @@ def plot_chi2_rotP_MC(out_period_scan, obj, Psec=False, out="chi2_rotP_MC.jpg"):
 
     # Plot histograms
     print(f"p_mean, p_std = {p_mean}, {p_std}")
-    rotP_str,rotPerr_str = round_error(rotP, rotPerr)
-    print(f"p_mean, p_std = {rotP_str}, {rotPerr_str}")
     if args.sec:
-        Ppart = f"P=${p_mean_str}\pm{p_std_str} s$"
+        Ppart = f"P=${p_mean:.5f}\pm{p_std:.5f} s$"
     else:
-        Ppart = f"P=${p_mean_str}\pm{p_std_str} h$"
+        Ppart = f"P=${p_mean:.5f}\pm{p_std:.4f} h$"
     
     # Plot N_mc and estimated rotP
     xmin, xmax = ax.get_xlim()
@@ -208,7 +205,7 @@ def plot_chi2_rotP_MC(out_period_scan, obj, Psec=False, out="chi2_rotP_MC.jpg"):
     plt.close()
 
 
-if __name__ == "__main__":
+def get_args():
     parser = ap(description="Plot period vs. chi2.")
     parser.add_argument(
         "obj", type=str, 
@@ -228,8 +225,12 @@ if __name__ == "__main__":
     parser.add_argument(
         "--out", type=str, default="ps_result.png",
         help="Output file name")
-    args = parser.parse_args()
+    return parser.parse_args()
     
+
+def main(args=None):
+    if args == None:
+        args = get_args()
     # Number of trials with Monte Carlo technique
     N_mc = len(args.out_period_scan)
 
@@ -237,3 +238,6 @@ if __name__ == "__main__":
         plot_chi2_rotP_MC(args.out_period_scan, args.obj, args.sec, out=args.out)
     else:
         plot_chi2_rotP(args.out_period_scan, args.obj, args.dof, args.sigma, args.sec, out=args.out)
+
+if __name__ == "__main__":
+    main()
