@@ -33,6 +33,8 @@ mag2flux = "smfl.scripts.mag2flux:main"
 format4convexinv = "smfl.scripts.format4convexinv:main"
 make_periodscan_input = "smfl.scripts.make_periodscan_input:main"
 make_convexinv_input = "smfl.scripts.make_convexinv_input:main"
+plot_Psid_chi2 = "smfl.scripts.plot_Psid_chi2:main"
+plot_phasefunc_damit = "smfl.scripts.plot_phasefunc_damit:main"
 
 [project.urls]
 Homepage = "https://github.com/jinbeniyama/smfl"
