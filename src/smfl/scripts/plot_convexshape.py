@@ -1,127 +1,149 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""Plot shape model of asteroids.
+"""Plot shape model of asteroids from an .obj file with perfect flat arrow axes.
 
 x, y, z: vertex
-
-Reference
----------
-https://notebook.community/tylerjereddy/pycon-2016/computational_geometry_tutorial
 """
-
 import os 
 from argparse import ArgumentParser as ap
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt  
-import datetime
-import seaborn as sns
-import matplotlib
-import warnings
-from scipy.spatial import ConvexHull
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
-warnings.simplefilter('ignore', category=matplotlib.MatplotlibDeprecationWarning)
+plt.rcParams["text.color"] = "white"
 
-from myio import get_filename
-from myplot import mycolor
+def get_args():
+    parser = ap(description="Plot shape model from OBJ file with flat arrow axes")
+    parser.add_argument(
+        "model", type=str, 
+        help="Path to the input .obj file")
+    parser.add_argument(
+        "out", type=str, 
+        help="Output file")
+    return parser.parse_args()
 
-plt.rcParams["xtick.labelsize"] = 10
-plt.rcParams["ytick.labelsize"] = 10
+def load_obj(filename):
+    """Parses a Wavefront .obj file to extract vertices and faces."""
+    vertices = []
+    faces = []
+    
+    with open(filename, "r") as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            
+            elements = line.split()
+            prefix = elements[0]
+            
+            if prefix == "v":
+                vertices.append([float(elements[1]), float(elements[2]), float(elements[3])])
+            elif prefix == "f":
+                face = [int(face_part.split('/')[0]) - 1 for face_part in elements[1:]]
+                faces.append(face)
+                
+    return np.array(vertices), faces
+
+def main(args=None):
+    
+    if args == None:
+        args = get_args()
+
+    if not os.path.exists(args.model):
+        print(f"Error: File not found: {args.model}")
+        return
+
+    pts, faces = load_obj(args.model)
+    x, y, z = pts[:, 0], pts[:, 1], pts[:, 2]
+
+    xmin, xmax = np.min(x), np.max(x)
+    ymin, ymax = np.min(y), np.max(y)
+    zmin, zmax = np.min(z), np.max(z)
+    plot_min, plot_max = np.min([xmin, ymin, zmin]), np.max([xmax, ymax, zmax])
+
+    face_colors = []
+    light_dir = np.array([1.0, 1.0, 2.0]) 
+    light_dir = light_dir / np.linalg.norm(light_dir)
+    
+    triangles = []
+    for face in faces:
+        poly = pts[face]
+        triangles.append(poly)
+        
+        if len(poly) >= 3:
+            v1 = poly[1] - poly[0]
+            v2 = poly[2] - poly[0]
+            normal = np.cross(v1, v2)
+            norm = np.linalg.norm(normal)
+            if norm > 0:
+                normal = normal / norm
+            else:
+                normal = np.array([0.0, 0.0, 1.0])
+        else:
+            normal = np.array([0.0, 0.0, 1.0])
+            
+        intensity = np.dot(normal, light_dir)
+        intensity = (intensity + 1.0) / 2.0 
+        brightness = 0.3 + 0.6 * intensity
+        face_colors.append((brightness, brightness, brightness, 1.0))
+    
+    fig = plt.figure(figsize=(24, 8), facecolor="black")
+    
+    ax1 = fig.add_axes([0.05, 0.05, 0.28, 0.85], projection="3d", facecolor="black")
+    ax2 = fig.add_axes([0.38, 0.05, 0.28, 0.85], projection="3d", facecolor="black")
+    ax3 = fig.add_axes([0.71, 0.05, 0.28, 0.85], projection="3d", facecolor="black")
+    
+    # From X-axis (YZ)
+    ax1.view_init(elev=0, azim=0)      
+    # From Y-axis (XZ)
+    ax2.view_init(elev=0, azim=270) 
+    # From Z-axis (XY)
+    ax3.view_init(elev=90, azim=270)  
+    
+    # Setting for arrow
+    arrow_config = {
+        ax1: [
+            ((0.88, 0.50), "y", (0.93, 0.50)),
+            ((0.50, 0.88), "z", (0.50, 0.93))
+        ],
+        ax2: [
+            ((0.12, 0.50), "x", (0.07, 0.50)), 
+            ((0.50, 0.88), "z", (0.50, 0.93))
+        ],
+        ax3: [
+            ((0.12, 0.50), "x", (0.07, 0.50)), 
+            ((0.50, 0.12), "y", (0.50, 0.07))  
+        ]
+    }
+
+
+    for i, ax in enumerate([ax1, ax2, ax3]):
+        # Add 3d mesh
+        mesh = Poly3DCollection(triangles, facecolors=face_colors, edgecolor="none")
+        ax.add_collection3d(mesh)
+        
+        ax.set_axis_off()
+        ax.set_box_aspect((1, 1, 1))
+        
+        ax.set_xlim([plot_min, plot_max])
+        ax.set_ylim([plot_min, plot_max])
+        ax.set_zlim([plot_min, plot_max])
+        
+        # Plot arrows
+        for end, label, text_pos in arrow_config[ax]:
+            ax.annotate("", xy=end, xytext=(0.5, 0.5), xycoords='axes fraction',
+                        arrowprops=dict(arrowstyle="-|>", color="white", lw=1.5, 
+                                        mutation_scale=15, patchA=None, patchB=None), zorder=-999)
+            ax.text2D(text_pos[0], text_pos[1], label, transform=ax.transAxes,
+                      color="white", fontsize=30, ha="center", va="center", weight="bold")
+            
+
+    print(f"Plot range: {plot_min} -- {plot_max}")
+     
+    # Save
+    out = args.out
+    plt.savefig(out, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight')
+    print(f"Saved: {out}")
 
 if __name__ == "__main__":
-  parser = ap(description="Plot shape model")
-  parser.add_argument(
-    "model", help="output of convexinv minkowski")
-  parser.add_argument(
-    "obj", type=str, help="object name")
-  args = parser.parse_args()
-
-  filename = get_filename(args.model)
-
-  x, y, z = [], [], []
-  with open(args.model, "r") as f:
-    f = f.readlines()[1:]
-    for line in f:
-      line = line.split(" ")
-      line = [x.strip("\n") for x in line if x!="" and x!="\n"]
-      assert len(line)==3, f"Invalid input.: n_row={len(line)}"
-      if float(line[0]).is_integer():
-        break
-      x.append(float(line[0]))
-      y.append(float(line[1]))
-      z.append(float(line[2]))
-      print(line)
-  
-  fig = plt.figure(figsize=(24, 8))
-  ax1 = fig.add_axes([0.1, 0.1, 0.25, 0.85], projection="3d")
-  ax2 = fig.add_axes([0.4, 0.1, 0.25, 0.85], projection="3d")
-  ax3 = fig.add_axes([0.7, 0.1, 0.25, 0.85], projection="3d")
-  # Set plot directions with DAMIT
-  ax1.view_init(elev=0, azim=0)
-  ax2.view_init(elev=0, azim=270)
-  ax3.view_init(elev=90, azim=270)
-
-  # elev=0, azim=0
-  ax1.set_title(f"{args.obj} (from x-axis)")
-  # elev=0, azim=90
-  ax2.set_title(f"{args.obj} (from y-axis)")
-  # elev=90, azim=0
-  ax3.set_title(f"{args.obj} (from z-axis)")
-
-  pts = np.array([[x,y,z] for (x,y,z) in zip(x,y,z)])
-  hull = ConvexHull(pts)
-  # hull_faces[i] consists of 3x3 elements
-  hull_facets = hull.points[hull.simplices]
-  
-  from mpl_toolkits.mplot3d.art3d import Poly3DCollection
-  flu_triangles = Poly3DCollection(hull_facets, alpha = 1, color="gray")
-  ax1.add_collection3d(flu_triangles)
-  flu_triangles = Poly3DCollection(hull_facets, alpha = 1, color="gray")
-  ax2.add_collection3d(flu_triangles)
-  flu_triangles = Poly3DCollection(hull_facets, alpha = 1, color="gray")
-  ax3.add_collection3d(flu_triangles)
-
-  # # Plot facet
-  # for x in hull_facets:
-  #   X, Y, Z = x
-  #   assert Fala
-  #   ax1.plot_surface(X, Y, Z, cmap='jet')
-
- 
-  # Plot edge
-  for (idx,s) in enumerate(hull.simplices):
-    if idx==0:
-      label = "convex"
-    else: 
-      label = None
-    # Here we cycle back to the first coordinate
-    s = np.append(s, s[0])  
-    # ax1.plot(pts[s, 0], pts[s, 1], pts[s, 2], "r-",  color="gray", label=label)
-    # ax2.plot(pts[s, 0], pts[s, 1], pts[s, 2], "r-",  color="gray", label=label)
-    # ax3.plot(pts[s, 0], pts[s, 1], pts[s, 2], "r-",  color="gray", label=label)
-  
-
-  # Vertex
-  for ax in [ax1, ax2, ax3]:
-    ax.scatter(x, y, z, s=0.1, alpha=0.5,color="black", label=None)
-    ax.set_xlabel("x")
-    ax.set_ylabel("y")
-    ax.set_zlabel("z")
-    ax.set_box_aspect((1,1,1))
-    #ax.set_zlim([-2,2])
-    ax.legend()
-
-  # Set plot range
-  xmin, xmax = ax1.get_xlim()
-  ymin, ymax = ax1.get_ylim()
-  zmin, zmax = ax1.get_zlim()
-  plot_min, plot_max = np.min([xmin, ymin, zmin]), np.max([xmax, ymax, zmax])
-  for ax in [ax1, ax2, ax3]:
-    ax.set_xlim([plot_min, plot_max])
-    ax.set_ylim([plot_min, plot_max])
-    ax.set_zlim([plot_min, plot_max])
-  print(f"{plot_min}--{plot_max}")
-
-   
-  out = f"{args.obj}_convexshape.png"
-  plt.savefig(out)
+    main()
