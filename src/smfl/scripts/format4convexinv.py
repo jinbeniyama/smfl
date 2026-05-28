@@ -32,58 +32,133 @@ from argparse import ArgumentParser as ap
 
 from smfl.util import format4inv, format4inv_query, Ariadnetestdata, save4inv, calc_JPLephem, tbinning
 
+ 
 def get_args():
-    parser = ap(description="Fotmat lightcurves for convex inversion.")
+
+    parser = ap(
+        description="Fotmat lightcurves for convex inversion."
+    )
+
     parser.add_argument(
-        "target", type=str,
-        help="Target name")
+        "target",
+        type=str,
+        help="Target name"
+    )
+
     parser.add_argument(
-        "--res", nargs="*",
-        help="Results of light curve observation")
+        "--res",
+        nargs="*",
+        help="Results of light curve observation"
+    )
+
     parser.add_argument(
-        "--code", nargs="*",
-        help="IAU observatory code")
+        "--code",
+        nargs="*",
+        help="IAU observatory code"
+    )
+
+    # ==========================================================
+    # NEW
+    # ==========================================================
+
     parser.add_argument(
-        "--samecode", action="store_true", default=False,
-        help="Whether ALL observations are from the same observatory")
+        "--listfile",
+        type=str,
+        default=None,
+        help=(
+            "Text file containing "
+            "'lightcurve_filename observatory_code'"
+        )
+    )
+
+    # ==========================================================
+
     parser.add_argument(
-        "--jpl", nargs="*",
-        help="JPL/HORIZONS result")
+        "--samecode",
+        action="store_true",
+        default=False,
+        help="Whether ALL observations are from the same observatory"
+    )
+
     parser.add_argument(
-        "--absflux", action="store_true", default=False,
-        help="Use absolute value of flux")
+        "--jpl",
+        nargs="*",
+        help="JPL/HORIZONS result"
+    )
+
     parser.add_argument(
-        "--N_mc", type=int, default=1, 
-        help="number of trials using Monte Carlo technique")
+        "--absflux",
+        action="store_true",
+        default=False,
+        help="Use absolute value of flux"
+    )
+
     parser.add_argument(
-        "--key_jd", default="t_jd_ltcor", 
-        help="Keyword of time in JD")
+        "--N_mc",
+        type=int,
+        default=1,
+        help="number of trials using Monte Carlo technique"
+    )
+
     parser.add_argument(
-        "--key_flux", default="flux", 
-        help="Keyword of flux")
+        "--key_jd",
+        default="t_jd_ltcor",
+        help="Keyword of time in JD"
+    )
+
     parser.add_argument(
-        "--key_fluxerr", default="fluxerr", 
-        help="Keyword of flux uncertainty")
+        "--key_flux",
+        default="flux",
+        help="Keyword of flux"
+    )
+
     parser.add_argument(
-        "--tbin", type=float, default=None, 
-        help="width of time bin")
+        "--key_fluxerr",
+        default="fluxerr",
+        help="Keyword of flux uncertainty"
+    )
+
     parser.add_argument(
-        "--sep", type=str, default=",", 
-        help="Separator")
+        "--tbin",
+        type=float,
+        default=None,
+        help="width of time bin"
+    )
+
     parser.add_argument(
-        "--unit_t", default="s", 
-        help="Unit of time for binning")
+        "--sep",
+        type=str,
+        default=",",
+        help="Separator"
+    )
+
     parser.add_argument(
-        "--out", default="out_lcs", 
-        help="output filename")
+        "--unit_t",
+        default="s",
+        help="Unit of time for binning"
+    )
+
     parser.add_argument(
-        "--test", action="store_true", default=False, 
-        help="Test for Ariadne")
+        "--out",
+        default="out_lcs",
+        help="output filename"
+    )
+
     parser.add_argument(
-        "--before202504", action="store_true", default=False, 
-        help="Old version before 202504.")
+        "--test",
+        action="store_true",
+        default=False,
+        help="Test for Ariadne"
+    )
+
+    parser.add_argument(
+        "--before202504",
+        action="store_true",
+        default=False,
+        help="Old version before 202504."
+    )
+
     return parser.parse_args()
-    
 
 def main(args=None):
     if args == None:
@@ -92,21 +167,77 @@ def main(args=None):
     # This is new version
     if not args.before202504:
         
-        N_lc = len(args.res)
-        print(f"Number of lightcurves = {N_lc}")
-        if args.samecode:
-            code_list = [args.code[0] for n in range(N_lc)]
+        # ==========================================================
+        # read lc/code list
+        # ==========================================================
+        
+        if args.listfile is not None:
+        
+            res_list = []
+        
+            code_list = []
+        
+            with open(args.listfile) as f:
+        
+                for line in f:
+        
+                    line = line.strip()
+        
+                    # skip blank/comment
+                    if (
+                        line == ""
+                        or line.startswith("#")
+                    ):
+                        continue
+        
+                    fi, co = line.split()
+        
+                    res_list.append(fi)
+        
+                    code_list.append(co)
+        
         else:
-            code_list = args.code
-            N_code = len(code_list)
-            print(f"Number of code = {N_code}")
-            print("")
-            assert N_code == N_lc, "Check lcs and codes."
-
+        
+            res_list = args.res
+        
+            N_lc = len(res_list)
+        
+            if args.samecode:
+        
+                code_list = [
+                    args.code[0]
+                    for n in range(N_lc)
+                ]
+        
+            else:
+        
+                code_list = args.code
+        
+        # ==========================================================
+        # check
+        # ==========================================================
+        
+        N_lc = len(res_list)
+        
+        N_code = len(code_list)
+        
+        print(
+            f"Number of lightcurves = {N_lc}"
+        )
+        
+        print(
+            f"Number of observatory codes = {N_code}"
+        )
+        
+        assert N_lc == N_code, (
+            "Check lc/code lengths."
+        )
+        
+        print("")
 
         result = []
         # Extract object info
-        for fi, co in zip(args.res, code_list):
+        for fi, co in zip(res_list, code_list):
             df_phot = pd.read_csv(fi, sep=f"{args.sep}")
             # Binning with time
             if args.tbin:
