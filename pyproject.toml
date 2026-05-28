@@ -30,6 +30,8 @@ dependencies = [
 [project.scripts]
 formatALCDEF = "smfl.scripts.formatALCDEF:main"
 mag2flux = "smfl.scripts.mag2flux:main"
+ltcor = "smfl.scripts.ltcor:main"
+prepro_ATLAS_SSO = "smfl.scripts.prepro_ATLAS_SSO:main"
 format4convexinv = "smfl.scripts.format4convexinv:main"
 make_periodscan_input = "smfl.scripts.make_periodscan_input:main"
 make_convexinv_input = "smfl.scripts.make_convexinv_input:main"
